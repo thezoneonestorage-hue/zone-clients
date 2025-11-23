@@ -377,7 +377,7 @@ const NextGenFooter = () => {
                       onChange={(e) => setUserAnswer(e.target.value)}
                       placeholder={
                         riddles[currentRiddleIndex].isSecret
-                          ? "Enter secret answer for admin access..."
+                          ? "Type your answer here..."
                           : "Type your answer here..."
                       }
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
