@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   FiSearch,
   FiChevronDown,
@@ -17,6 +18,7 @@ import {
   FiGlobe,
   FiClock,
   FiMessageCircle,
+  FiArrowLeft, // Add back arrow icon
 } from "react-icons/fi";
 import { getFAQs } from "../services/api";
 import SectionHeader from "../components/Shared/SectionHeader";
@@ -156,6 +158,9 @@ const FaqsPage = () => {
     highPriority: 0,
   });
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Add navigation hook
+  const navigate = useNavigate();
 
   // Enhanced FAQ categories with teal/blue color palette
   const categories = [
@@ -411,6 +416,11 @@ const FaqsPage = () => {
     setFilteredFaqs(filtered);
   }, [searchTerm, selectedCategory, faqs]);
 
+  // Back button handler
+  const handleBackToDashboard = () => {
+    window.location.href = "/dashboard"; // Navigate to dashboard
+  };
+
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -565,6 +575,24 @@ const FaqsPage = () => {
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
+        {/* Back Button - Added at the top */}
+        <motion.div
+          className="mb-6 lg:mb-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.button
+            onClick={handleBackToDashboard}
+            className="flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-teal-200 rounded-xl text-teal-600 hover:bg-teal-50 hover:text-teal-700 transition-all duration-300 shadow-lg group"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span className="font-medium">Back to Dashboard</span>
+          </motion.button>
+        </motion.div>
+
         {/* Enhanced Header Section */}
         <motion.div
           className="text-center mb-12 lg:mb-20"
