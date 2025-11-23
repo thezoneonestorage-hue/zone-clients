@@ -51,12 +51,12 @@ const Login = () => {
         const userProfile = await getCurrentUser();
         console.log("User profile:", userProfile);
 
-        if (userProfile?.data?.user?.role === "admin") {
+        if (userProfile?.data?.user) {
           setIsAlreadyLoggedIn(true);
           setMessage("You are already logged in. Redirecting to dashboard...");
 
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = "/dashboard";
           }, 2000);
         } else {
           localStorage.removeItem("token");
