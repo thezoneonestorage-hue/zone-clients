@@ -297,13 +297,13 @@ const Faqs = ({ onBack }) => {
         >
           <div className="flex items-center justify-between">
             <div>
-              <button
-                onClick={onBack}
+              <a
+                href="/dashboard"
                 className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 mb-4 transition-colors"
               >
                 <FiArrowLeft className="w-4 h-4" />
                 <span>Back</span>
-              </button>
+              </a>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Video Editing FAQ Management
               </h1>
