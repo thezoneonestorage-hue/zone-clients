@@ -1,38 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   FiPlus,
   FiEdit,
   FiTrash2,
   FiSave,
-  FiX,
   FiSearch,
   FiFilter,
   FiEye,
   FiThumbsUp,
   FiThumbsDown,
   FiArrowLeft,
-  FiHelpCircle,
-  FiTag,
-  FiStar,
-  FiBarChart2,
   FiVideo,
-  FiFilm,
-  FiScissors,
-  FiClock,
-  FiDollarSign,
-  FiFileText,
+  FiCheck,
+  FiX,
 } from "react-icons/fi";
-import {
-  getFAQs,
-  createFAQ,
-  updateFAQ,
-  deleteFAQ,
-  getFAQsByCategory,
-  getPopularFAQs,
-} from "../services/api"; // Update path to your API file
+import { getFAQs, createFAQ, updateFAQ, deleteFAQ } from "../services/api";
 
-const Faqs = ({ onBack }) => {
+const Faqs = () => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -42,48 +32,57 @@ const Faqs = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [isMessageVisible, setIsMessageVisible] = useState(false);
+  const faqListRef = useRef(null);
 
-  // Video editing agency specific categories
-  const categories = [
-    "general",
-    "pricing",
-    "turnaround",
-    "revisions",
-    "file-formats",
-    "process",
-    "quality",
-    "rights-usage",
-    "emergency",
-    "collaboration",
-  ];
+  const categories = useMemo(
+    () => [
+      "general",
+      "pricing",
+      "turnaround",
+      "revisions",
+      "file-formats",
+      "process",
+      "quality",
+      "rights-usage",
+      "emergency",
+      "collaboration",
+    ],
+    []
+  );
 
-  const categoryLabels = {
-    general: "General",
-    pricing: "Pricing & Packages",
-    turnaround: "Turnaround Time",
-    revisions: "Revisions & Changes",
-    "file-formats": "File Formats",
-    process: "Editing Process",
-    quality: "Quality & Standards",
-    "rights-usage": "Rights & Usage",
-    emergency: "Emergency Services",
-    collaboration: "Collaboration",
-  };
+  const categoryLabels = useMemo(
+    () => ({
+      general: "General",
+      pricing: "Pricing",
+      turnaround: "Turnaround",
+      revisions: "Revisions",
+      "file-formats": "Formats",
+      process: "Process",
+      quality: "Quality",
+      "rights-usage": "Rights",
+      emergency: "Emergency",
+      collaboration: "Collaboration",
+    }),
+    []
+  );
 
-  const categoryIcons = {
-    general: <FiHelpCircle className="w-4 h-4" />,
-    pricing: <FiDollarSign className="w-4 h-4" />,
-    turnaround: <FiClock className="w-4 h-4" />,
-    revisions: <FiScissors className="w-4 h-4" />,
-    "file-formats": <FiFileText className="w-4 h-4" />,
-    process: <FiFilm className="w-4 h-4" />,
-    quality: <FiStar className="w-4 h-4" />,
-    "rights-usage": <FiFileText className="w-4 h-4" />,
-    emergency: <FiClock className="w-4 h-4" />,
-    collaboration: <FiVideo className="w-4 h-4" />,
-  };
+  const categoryColors = useMemo(
+    () => ({
+      general: "bg-blue-100 text-blue-700 border-blue-200",
+      pricing: "bg-green-100 text-green-700 border-green-200",
+      turnaround: "bg-orange-100 text-orange-700 border-orange-200",
+      revisions: "bg-purple-100 text-purple-700 border-purple-200",
+      "file-formats": "bg-indigo-100 text-indigo-700 border-indigo-200",
+      process: "bg-teal-100 text-teal-700 border-teal-200",
+      quality: "bg-amber-100 text-amber-700 border-amber-200",
+      "rights-usage": "bg-red-100 text-red-700 border-red-200",
+      emergency: "bg-pink-100 text-pink-700 border-pink-200",
+      collaboration: "bg-cyan-100 text-cyan-700 border-cyan-200",
+    }),
+    []
+  );
 
-  // Form state
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
@@ -92,7 +91,187 @@ const Faqs = ({ onBack }) => {
     isActive: true,
   });
 
-  // Fetch FAQs on component mount
+  // CSS transitions for smooth animations
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      
+      @keyframes bounceIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        60% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      
+      @keyframes shimmer {
+        0% { background-position: -200px 0; }
+        100% { background-position: calc(200px + 100%) 0; }
+      }
+      
+      .animate-fadeInUp {
+        animation: fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+      
+      .animate-slideInRight {
+        animation: slideInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      
+      .animate-slideInLeft {
+        animation: slideInLeft 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      
+      .animate-pulse {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      
+      .animate-bounceIn {
+        animation: bounceIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      
+      .animate-shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      
+      .page-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .card-hover {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      
+      .button-press {
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .button-press:active {
+        transform: scale(0.97);
+      }
+      
+      .fade-enter {
+        opacity: 0;
+      }
+      
+      .fade-enter-active {
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+      }
+      
+      .fade-exit {
+        opacity: 1;
+      }
+      
+      .fade-exit-active {
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+      }
+      
+      .slide-up-enter {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      
+      .slide-up-enter-active {
+        opacity: 1;
+        transform: translateY(0);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      
+      .stagger-item {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      
+      .stagger-item.visible {
+        opacity: 1;
+        transform: translateY(0);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      
+      .smooth-scroll {
+        scroll-behavior: smooth;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Add stagger animation to FAQ items
+    const timer = setTimeout(() => {
+      const items = document.querySelectorAll(".stagger-item");
+      items.forEach((item, index) => {
+        setTimeout(() => {
+          item.classList.add("visible");
+        }, index * 50);
+      });
+    }, 100);
+
+    return () => {
+      document.head.removeChild(style);
+      clearTimeout(timer);
+    };
+  }, [faqs]);
+
+  // Fetch FAQs
   useEffect(() => {
     fetchFAQs();
   }, []);
@@ -110,19 +289,21 @@ const Faqs = ({ onBack }) => {
     }
   };
 
-  const showMessage = (type, text, duration = 3000) => {
+  const showMessage = useCallback((type, text) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage({ type: "", text: "" }), duration);
-  };
+    setIsMessageVisible(true);
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    setTimeout(() => {
+      setIsMessageVisible(false);
+      setTimeout(() => setMessage({ type: "", text: "" }), 300);
+    }, 3000);
+  }, []);
 
-  const resetForm = () => {
+  const handleInputChange = useCallback((field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const resetForm = useCallback(() => {
     setFormData({
       question: "",
       answer: "",
@@ -132,67 +313,50 @@ const Faqs = ({ onBack }) => {
     });
     setSelectedFAQ(null);
     setEditMode(false);
-  };
+  }, []);
 
-  const handleCreateFAQ = async () => {
-    try {
-      setSaving(true);
-
-      if (!formData.question || !formData.answer) {
-        showMessage("error", "Question and answer are required");
-        return;
-      }
-
-      await createFAQ(formData);
-      showMessage("success", "FAQ created successfully");
-      resetForm();
-      fetchFAQs();
-    } catch (error) {
-      console.error("Error creating FAQ:", error);
-      showMessage("error", "Failed to create FAQ");
-    } finally {
-      setSaving(false);
+  const handleSaveFAQ = async () => {
+    if (!formData.question || !formData.answer) {
+      showMessage("error", "Question and answer are required");
+      return;
     }
-  };
 
-  const handleUpdateFAQ = async () => {
     try {
       setSaving(true);
-
-      if (!formData.question || !formData.answer) {
-        showMessage("error", "Question and answer are required");
-        return;
+      if (editMode && selectedFAQ) {
+        await updateFAQ(selectedFAQ.slug, formData);
+        showMessage("success", "FAQ updated successfully");
+      } else {
+        await createFAQ(formData);
+        showMessage("success", "FAQ created successfully");
       }
-
-      await updateFAQ(selectedFAQ.slug, formData);
-      showMessage("success", "FAQ updated successfully");
       resetForm();
-      fetchFAQs();
+      await fetchFAQs();
     } catch (error) {
-      console.error("Error updating FAQ:", error);
-      showMessage("error", "Failed to update FAQ");
+      console.error("Error saving FAQ:", error);
+      showMessage("error", "Failed to save FAQ");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteFAQ = async (faq) => {
-    if (window.confirm(`Are you sure you want to delete "${faq.question}"?`)) {
-      try {
-        setSaving(true);
-        await deleteFAQ(faq.slug);
-        showMessage("success", "FAQ deleted successfully");
-        fetchFAQs();
-      } catch (error) {
-        console.error("Error deleting FAQ:", error);
-        showMessage("error", "Failed to delete FAQ");
-      } finally {
-        setSaving(false);
-      }
+    if (!window.confirm(`Delete "${faq.question}"?`)) return;
+
+    try {
+      setSaving(true);
+      await deleteFAQ(faq.slug);
+      showMessage("success", "FAQ deleted successfully");
+      await fetchFAQs();
+    } catch (error) {
+      console.error("Error deleting FAQ:", error);
+      showMessage("error", "Failed to delete FAQ");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleEditFAQ = (faq) => {
+  const handleEditFAQ = useCallback((faq) => {
     setFormData({
       question: faq.question,
       answer: faq.answer,
@@ -202,175 +366,209 @@ const Faqs = ({ onBack }) => {
     });
     setSelectedFAQ(faq);
     setEditMode(true);
-  };
 
-  const handleSearch = () => {
+    // Scroll to form
+    if (faqListRef.current) {
+      faqListRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  const handleSearch = useCallback(() => {
     const filters = {};
     if (searchTerm) filters.search = searchTerm;
     if (filterCategory !== "all") filters.category = filterCategory;
     if (filterStatus !== "all") filters.isActive = filterStatus === "active";
-
     fetchFAQs(filters);
-  };
+  }, [searchTerm, filterCategory, filterStatus]);
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      general: "bg-blue-100 text-blue-800",
-      pricing: "bg-green-100 text-green-800",
-      turnaround: "bg-orange-100 text-orange-800",
-      revisions: "bg-purple-100 text-purple-800",
-      "file-formats": "bg-indigo-100 text-indigo-800",
-      process: "bg-teal-100 text-teal-800",
-      quality: "bg-amber-100 text-amber-800",
-      "rights-usage": "bg-red-100 text-red-800",
-      emergency: "bg-pink-100 text-pink-800",
-      collaboration: "bg-cyan-100 text-cyan-800",
-    };
-    return colors[category] || "bg-gray-100 text-gray-800";
-  };
+  // Optimized FAQ Item Component
+  const FAQItem = React.memo(({ faq, index, onEdit, onDelete }) => {
+    const [isHovered, setIsHovered] = useState(false);
 
-  const getPriorityBadge = (priority) => {
-    if (priority >= 8) return "bg-red-100 text-red-800";
-    if (priority >= 5) return "bg-orange-100 text-orange-800";
-    if (priority >= 3) return "bg-yellow-100 text-yellow-800";
-    return "bg-gray-100 text-gray-800";
-  };
-
-  // Sample FAQ data for video editing agency
-  const sampleQuestions = {
-    pricing: [
-      {
-        question: "What are your pricing packages for video editing?",
-        answer:
-          "We offer three main packages: Basic ($199) includes 5-minute video with color correction; Standard ($399) includes 10-minute video with motion graphics; Premium ($699) includes 15-minute video with advanced effects and sound design.",
-      },
-    ],
-    turnaround: [
-      {
-        question: "What is your typical turnaround time for a 5-minute video?",
-        answer:
-          "Our standard turnaround time is 3-5 business days for a 5-minute video. Rush services are available for 24-48 hour delivery at an additional 50% fee.",
-      },
-    ],
-    revisions: [
-      {
-        question: "How many revisions are included in your packages?",
-        answer:
-          "All packages include 2 rounds of revisions. Additional revisions are available at $50 per round. We ensure complete satisfaction with your final video.",
-      },
-    ],
-  };
-
-  const addSampleQuestion = (category) => {
-    const samples = sampleQuestions[category];
-    if (samples && samples.length > 0) {
-      const sample = samples[0];
-      setFormData((prev) => ({
-        ...prev,
-        question: sample.question,
-        answer: sample.answer,
-        category: category,
-      }));
-    }
-  };
-
-  if (loading && faqs.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"
-        />
+      <div
+        className="stagger-item card-hover bg-white rounded-xl border border-gray-200 p-5 mb-3"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ animationDelay: `${index * 50}ms` }}
+      >
+        <div className="flex justify-between items-start">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <h4 className="font-semibold text-gray-900 text-base line-clamp-2 flex-1">
+                {faq.question}
+              </h4>
+              <span
+                className={`px-3 py-1 text-xs rounded-full border ${
+                  categoryColors[faq.category]
+                }`}
+              >
+                {categoryLabels[faq.category]}
+              </span>
+              {faq.priority > 0 && (
+                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                  Priority: {faq.priority}
+                </span>
+              )}
+            </div>
+            <p className="text-gray-600 text-sm line-clamp-3 mb-3">
+              {faq.answer}
+            </p>
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <FiEye className="w-3 h-3" />
+                <span>{faq.views || 0} views</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <FiThumbsUp className="w-3 h-3" />
+                <span>{faq.helpfulCount || 0}</span>
+              </div>
+              <div
+                className={`px-2 py-1 rounded-full ${
+                  faq.isActive
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
+                }`}
+              >
+                {faq.isActive ? "Active" : "Inactive"}
+              </div>
+            </div>
+          </div>
+          <div
+            className={`flex items-center gap-1 ml-3 transition-all duration-300 ${
+              isHovered
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 translate-x-2"
+            }`}
+          >
+            <button
+              onClick={() => onEdit(faq)}
+              className="button-press p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Edit FAQ"
+            >
+              <FiEdit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onDelete(faq)}
+              className="button-press p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Delete FAQ"
+            >
+              <FiTrash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
     );
-  }
+  });
+
+  FAQItem.displayName = "FAQItem";
+
+  // Skeleton loading component
+  const SkeletonFAQ = () => (
+    <div className="animate-shimmer bg-gray-100 rounded-xl p-5 mb-3">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-2/3 mb-4"></div>
+          <div className="flex gap-2">
+            <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+            <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6 smooth-scroll page-transition">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between">
+        {/* Header with animation */}
+        <div className="animate-fadeInUp mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
               <a
                 href="/dashboard"
-                className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 mb-4 transition-colors"
+                className="button-press inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-3 group transition-all"
               >
-                <FiArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <FiArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back to Dashboard</span>
               </a>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                 Video Editing FAQ Management
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mt-1">
                 Manage frequently asked questions for your video editing agency
               </p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={resetForm}
-              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors"
+              className="button-press card-hover animate-bounceIn flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 shadow-md"
             >
               <FiPlus className="w-4 h-4" />
               <span>Add New FAQ</span>
-            </motion.button>
+            </button>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Message Alert */}
-        <AnimatePresence>
+        {/* Animated Message */}
+        <div
+          className={`transition-all duration-300 transform ${
+            isMessageVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-2"
+          }`}
+        >
           {message.text && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`p-4 rounded-lg mb-6 ${
+            <div
+              className={`p-4 rounded-xl mb-6 border ${
                 message.type === "success"
-                  ? "bg-green-50 border border-green-200 text-green-800"
-                  : "bg-red-50 border border-red-200 text-red-800"
+                  ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 text-green-800"
+                  : "bg-gradient-to-r from-red-50 to-rose-50 border-red-200 text-red-800"
               }`}
             >
-              {message.text}
-            </motion.div>
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-full ${
+                    message.type === "success" ? "bg-green-100" : "bg-red-100"
+                  }`}
+                >
+                  {message.type === "success" ? (
+                    <FiCheck className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <FiX className="w-4 h-4 text-red-600" />
+                  )}
+                </div>
+                <span className="font-medium">{message.text}</span>
+              </div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* FAQ Form */}
-          <div className="lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-            >
-              {/* Form Header */}
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-white/20 rounded-lg">
-                    <FiVideo className="h-6 w-6 text-white" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" ref={faqListRef}>
+          {/* Form Section with slide in animation */}
+          <div className="animate-slideInLeft lg:col-span-1">
+            <div className="card-hover bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <FiVideo className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">
+                    <h2 className="font-bold text-white">
                       {editMode ? "Edit FAQ" : "Create New FAQ"}
                     </h2>
-                    <p className="text-white/80 text-sm">
+                    <p className="text-white/90 text-sm">
                       {editMode
-                        ? "Update the FAQ details"
+                        ? "Update FAQ details"
                         : "Add a new video editing question"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Form Content */}
-              <div className="p-6 space-y-4">
-                <div>
+              <div className="p-5 space-y-4">
+                <div className="transition-all duration-200">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Question *
                   </label>
@@ -379,13 +577,13 @@ const Faqs = ({ onBack }) => {
                     onChange={(e) =>
                       handleInputChange("question", e.target.value)
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                    placeholder="e.g., What is your turnaround time for video editing?"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                    placeholder="Enter your question..."
                     rows={3}
                   />
                 </div>
 
-                <div>
+                <div className="transition-all duration-200">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Answer *
                   </label>
@@ -394,13 +592,13 @@ const Faqs = ({ onBack }) => {
                     onChange={(e) =>
                       handleInputChange("answer", e.target.value)
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    placeholder="e.g., Our standard turnaround time is 3-5 business days..."
-                    rows={5}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                    placeholder="Provide a detailed answer..."
+                    rows={4}
                   />
                 </div>
 
-                <div>
+                <div className="transition-all duration-200">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Category
                   </label>
@@ -409,7 +607,7 @@ const Faqs = ({ onBack }) => {
                     onChange={(e) =>
                       handleInputChange("category", e.target.value)
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                   >
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>
@@ -417,49 +615,39 @@ const Faqs = ({ onBack }) => {
                       </option>
                     ))}
                   </select>
-
-                  {/* Quick Sample Buttons */}
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {Object.keys(sampleQuestions).map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => addSampleQuestion(cat)}
-                        className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
-                      >
-                        Sample {categoryLabels[cat]}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
-                <div>
+                <div className="transition-all duration-200">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Priority (0-10)
+                    Priority:{" "}
+                    <span className="text-purple-600 font-bold">
+                      {formData.priority}
+                    </span>
                   </label>
                   <input
-                    type="number"
+                    type="range"
                     min="0"
                     max="10"
                     value={formData.priority}
                     onChange={(e) =>
                       handleInputChange("priority", parseInt(e.target.value))
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-600"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    0 = Low priority, 10 = High priority (appears first)
-                  </p>
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg transition-all duration-200">
                   <div>
                     <label className="text-sm font-semibold text-gray-700">
                       Status
                     </label>
                     <p className="text-sm text-gray-500">
-                      {formData.isActive
-                        ? "Active (Visible to clients)"
-                        : "Inactive (Hidden)"}
+                      {formData.isActive ? "Visible to clients" : "Hidden"}
                     </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -471,79 +659,71 @@ const Faqs = ({ onBack }) => {
                       }
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                    <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 transition-all duration-300"></div>
                   </label>
                 </div>
 
-                <div className="flex space-x-3 pt-4">
+                <div className="flex gap-3 pt-2">
                   {(editMode || formData.question) && (
                     <button
                       onClick={resetForm}
-                      className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                      className="button-press flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200"
                     >
                       Cancel
                     </button>
                   )}
                   <button
-                    onClick={editMode ? handleUpdateFAQ : handleCreateFAQ}
+                    onClick={handleSaveFAQ}
                     disabled={saving || !formData.question || !formData.answer}
-                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="button-press flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md"
                   >
                     {saving ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                        />
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>Saving...</span>
                       </div>
+                    ) : editMode ? (
+                      "Update FAQ"
                     ) : (
-                      <div className="flex items-center justify-center space-x-2">
-                        <FiSave className="w-4 h-4" />
-                        <span>{editMode ? "Update FAQ" : "Create FAQ"}</span>
-                      </div>
+                      "Create FAQ"
                     )}
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
-          {/* FAQ List */}
-          <div className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-            >
-              {/* List Header */}
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Video Editing FAQs ({faqs.length})
-                  </h3>
+          {/* FAQ List Section with slide in animation */}
+          <div className="animate-slideInRight lg:col-span-2">
+            <div className="card-hover bg-white rounded-xl border border-gray-200 overflow-hidden h-full flex flex-col">
+              <div className="p-5 border-b border-gray-200">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Video Editing FAQs
+                    </h3>
+                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium animate-fadeIn">
+                      {faqs.length} items
+                    </span>
+                  </div>
 
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                  <div className="flex flex-wrap gap-2">
                     <div className="relative">
                       <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type="text"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search video editing FAQs..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        placeholder="Search FAQs..."
+                        className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                       />
                     </div>
 
                     <select
                       value={filterCategory}
                       onChange={(e) => setFilterCategory(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     >
                       <option value="all">All Categories</option>
                       {categories.map((cat) => (
@@ -556,7 +736,7 @@ const Faqs = ({ onBack }) => {
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                     >
                       <option value="all">All Status</option>
                       <option value="active">Active</option>
@@ -565,7 +745,7 @@ const Faqs = ({ onBack }) => {
 
                     <button
                       onClick={handleSearch}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      className="button-press px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
                     >
                       <FiFilter className="w-4 h-4" />
                     </button>
@@ -573,104 +753,60 @@ const Faqs = ({ onBack }) => {
                 </div>
               </div>
 
-              {/* FAQ List */}
-              <div className="max-h-96 overflow-y-auto">
-                {faqs.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
-                    <FiVideo className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>
-                      No FAQs found. Create your first video editing FAQ to get
-                      started.
+              {/* FAQ Items with smooth scrolling */}
+              <div className="flex-1 overflow-y-auto max-h-[calc(100vh-300px)] smooth-scroll p-5">
+                {loading && faqs.length === 0 ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <SkeletonFAQ key={i} />
+                    ))}
+                  </div>
+                ) : faqs.length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="animate-bounceIn inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                      <FiVideo className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                      No FAQs Found
+                    </h4>
+                    <p className="text-gray-600">
+                      {searchTerm ||
+                      filterCategory !== "all" ||
+                      filterStatus !== "all"
+                        ? "Try adjusting your search criteria"
+                        : "Create your first FAQ to get started"}
                     </p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-200">
+                  <div>
                     {faqs.map((faq, index) => (
-                      <motion.div
+                      <FAQItem
                         key={faq._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="p-6 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h4 className="font-semibold text-gray-900 line-clamp-2">
-                                {faq.question}
-                              </h4>
-                              <span
-                                className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 ${getCategoryColor(
-                                  faq.category
-                                )}`}
-                              >
-                                {categoryIcons[faq.category]}
-                                <span>{categoryLabels[faq.category]}</span>
-                              </span>
-                              {faq.priority > 0 && (
-                                <span
-                                  className={`px-2 py-1 text-xs rounded-full ${getPriorityBadge(
-                                    faq.priority
-                                  )}`}
-                                >
-                                  <FiStar className="w-3 h-3 inline mr-1" />
-                                  {faq.priority}
-                                </span>
-                              )}
-                            </div>
-
-                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                              {faq.answer}
-                            </p>
-
-                            <div className="flex items-center space-x-4 text-xs text-gray-500">
-                              <div className="flex items-center space-x-1">
-                                <FiEye className="w-3 h-3" />
-                                <span>{faq.views} views</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <FiThumbsUp className="w-3 h-3" />
-                                <span>{faq.helpfulCount}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <FiThumbsDown className="w-3 h-3" />
-                                <span>{faq.notHelpfulCount}</span>
-                              </div>
-                              <span
-                                className={
-                                  faq.isActive
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }
-                              >
-                                {faq.isActive ? "Active" : "Inactive"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center space-x-2 ml-4">
-                            <button
-                              onClick={() => handleEditFAQ(faq)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Edit FAQ"
-                            >
-                              <FiEdit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteFAQ(faq)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Delete FAQ"
-                            >
-                              <FiTrash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
+                        faq={faq}
+                        index={index}
+                        onEdit={handleEditFAQ}
+                        onDelete={handleDeleteFAQ}
+                      />
                     ))}
                   </div>
                 )}
               </div>
-            </motion.div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                <div className="flex justify-between items-center text-sm text-gray-600">
+                  <span>Showing {faqs.length} FAQs</span>
+                  <button
+                    onClick={() =>
+                      window.scrollTo({ top: 0, behavior: "smooth" })
+                    }
+                    className="button-press text-purple-600 hover:text-purple-700 font-medium transition-colors"
+                  >
+                    Back to top ↑
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -678,4 +814,4 @@ const Faqs = ({ onBack }) => {
   );
 };
 
-export default Faqs;
+export default React.memo(Faqs);

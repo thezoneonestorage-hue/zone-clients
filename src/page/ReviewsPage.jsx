@@ -8,6 +8,7 @@ import {
   updateReview,
   deleteReview,
   uploadFile,
+  getVideoReviews, // Add this import
 } from "../services/api";
 import ReviewList from "../components/ReviewList";
 import ReviewModal from "../components/ReviewModal";
@@ -15,7 +16,10 @@ import ReviewModal from "../components/ReviewModal";
 const ReviewsPage = () => {
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
+  const [videoReviews, setVideoReviews] = useState([]); // New state for video reviews
   const [loading, setLoading] = useState(true);
+  const [videoReviewsLoading, setVideoReviewsLoading] = useState(false); // Separate loading state
+  const [activeTab, setActiveTab] = useState("text"); // 'text' or 'video'
   const [showOnlyBestReviews, setShowOnlyBestReviews] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
@@ -32,22 +36,42 @@ const ReviewsPage = () => {
   });
 
   useEffect(() => {
-    fetchReviews(showOnlyBestReviews);
-  }, [showOnlyBestReviews]);
+    if (activeTab === "text") {
+      fetchTextReviews(showOnlyBestReviews);
+    } else if (activeTab === "video") {
+      fetchVideoReviews(showOnlyBestReviews);
+    }
+  }, [activeTab, showOnlyBestReviews]);
 
-  const fetchReviews = async (filterBest = false) => {
+  const fetchTextReviews = async (filterBest = false) => {
     try {
       setLoading(true);
-      let query = "";
+      let query = {};
       if (filterBest) {
-        query = { isBest: true };
+        query.isBest = true;
       }
       const res = await getReviews(query);
       setReviews(res.data.reviews);
     } catch (err) {
-      toast.error("Failed to fetch reviews");
+      toast.error("Failed to fetch text reviews");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchVideoReviews = async (filterBest = false) => {
+    try {
+      setVideoReviewsLoading(true);
+      let query = {};
+      if (filterBest) {
+        query.isBest = true;
+      }
+      const res = await getVideoReviews(query);
+      setVideoReviews(res.data.reviews || res.data.videoReviews || []);
+    } catch (err) {
+      toast.error("Failed to fetch video reviews");
+    } finally {
+      setVideoReviewsLoading(false);
     }
   };
 
@@ -125,7 +149,13 @@ const ReviewsPage = () => {
         isBest: false,
       });
       setEditingReview(null);
-      await fetchReviews(showOnlyBestReviews);
+
+      // Refresh the current tab's reviews
+      if (activeTab === "text") {
+        await fetchTextReviews(showOnlyBestReviews);
+      } else {
+        await fetchVideoReviews(showOnlyBestReviews);
+      }
     } catch (err) {
       toast.error(err.message || "Failed to save review");
     } finally {
@@ -151,11 +181,25 @@ const ReviewsPage = () => {
     try {
       await deleteReview(id);
       toast.success("Review deleted");
-      setReviews((prev) => prev.filter((review) => review._id !== id));
+
+      // Update the appropriate state based on active tab
+      if (activeTab === "text") {
+        setReviews((prev) => prev.filter((review) => review._id !== id));
+      } else {
+        setVideoReviews((prev) => prev.filter((review) => review._id !== id));
+      }
     } catch (err) {
       toast.error("Failed to delete review");
     }
   };
+
+  // Calculate counts for tabs
+  const textReviewsCount = reviews.length;
+  const videoReviewsCount = videoReviews.length;
+  const bestTextReviewsCount = reviews.filter((review) => review.isBest).length;
+  const bestVideoReviewsCount = videoReviews.filter(
+    (review) => review.isBest
+  ).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -174,7 +218,69 @@ const ReviewsPage = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex justify-end mb-6">
+        {/* Tabs */}
+        <div className="mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab("text")}
+                className={`
+                  py-4 px-1 border-b-2 font-medium text-sm
+                  ${
+                    activeTab === "text"
+                      ? "border-red-500 text-red-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }
+                `}
+              >
+                Text Reviews
+                <span
+                  className={`ml-2 py-0.5 px-2 text-xs rounded-full ${
+                    activeTab === "text"
+                      ? "bg-red-100 text-red-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {showOnlyBestReviews
+                    ? bestTextReviewsCount
+                    : textReviewsCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("video")}
+                className={`
+                  py-4 px-1 border-b-2 font-medium text-sm
+                  ${
+                    activeTab === "video"
+                      ? "border-red-500 text-red-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }
+                `}
+              >
+                Video Reviews
+                <span
+                  className={`ml-2 py-0.5 px-2 text-xs rounded-full ${
+                    activeTab === "video"
+                      ? "bg-red-100 text-red-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {showOnlyBestReviews
+                    ? bestVideoReviewsCount
+                    : videoReviewsCount}
+                </span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-sm text-gray-600">
+            Showing {activeTab === "text" ? "Text" : "Video"} Reviews
+            {showOnlyBestReviews && " (Best Only)"}
+          </div>
+
           <div className="flex items-center space-x-4">
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -189,7 +295,9 @@ const ReviewsPage = () => {
               {showOnlyBestReviews ? "Show All Reviews" : "Show Best Only"}
               {showOnlyBestReviews && (
                 <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  {reviews.filter((review) => review.isBest).length}
+                  {activeTab === "text"
+                    ? bestTextReviewsCount
+                    : bestVideoReviewsCount}
                 </span>
               )}
             </motion.button>
@@ -202,7 +310,7 @@ const ReviewsPage = () => {
                 setReviewForm({
                   content: "",
                   rating: 5,
-                  video: "",
+                  video: activeTab === "video" ? "" : undefined, // Pre-select video field for video reviews tab
                   videoId: "",
                   userName: "",
                   isBest: false,
@@ -211,12 +319,30 @@ const ReviewsPage = () => {
               }}
               className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
             >
-              + Add New Review
+              + Add {activeTab === "video" ? "Video " : ""}Review
             </motion.button>
           </div>
         </div>
 
-        {loading ? (
+        {activeTab === "text" ? (
+          loading ? (
+            <div className="flex justify-center items-center h-64">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"
+              />
+            </div>
+          ) : (
+            <ReviewList
+              reviews={reviews}
+              onEdit={editReview}
+              onDelete={deleteReviewItem}
+              showOnlyBest={showOnlyBestReviews}
+              type="text"
+            />
+          )
+        ) : videoReviewsLoading ? (
           <div className="flex justify-center items-center h-64">
             <motion.div
               animate={{ rotate: 360 }}
@@ -226,10 +352,11 @@ const ReviewsPage = () => {
           </div>
         ) : (
           <ReviewList
-            reviews={reviews}
+            reviews={videoReviews}
             onEdit={editReview}
             onDelete={deleteReviewItem}
             showOnlyBest={showOnlyBestReviews}
+            type="video"
           />
         )}
       </main>
@@ -246,6 +373,7 @@ const ReviewsPage = () => {
           handleFileUpload={handleFileUpload}
           submitReviewForm={submitReviewForm}
           editingReview={editingReview}
+          reviewType={activeTab} // Pass active tab to modal for conditional rendering
         />
       )}
     </div>

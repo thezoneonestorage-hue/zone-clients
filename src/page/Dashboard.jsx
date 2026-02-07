@@ -10,6 +10,7 @@ import {
   FiHelpCircle,
   FiBarChart2,
 } from "react-icons/fi";
+import { FaAddressBook } from "react-icons/fa";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -53,9 +54,9 @@ const Dashboard = () => {
     {
       title: "FAQs",
       description: "Manage frequently asked questions",
-      icon: <FiHelpCircle className="h-8 w-8 text-indigo-500" />,
+      icon: <FiHelpCircle className="h-8 w-8 text-cyan-500" />,
       path: "/dashboard/faqs",
-      color: "bg-gradient-to-br from-indigo-50 to-indigo-100",
+      color: "bg-gradient-to-br from-cyan-50 to-cyan-100",
     },
     {
       title: "Settings",
@@ -63,6 +64,13 @@ const Dashboard = () => {
       icon: <FiSettings className="h-8 w-8 text-purple-500" />,
       path: "/dashboard/settings",
       color: "bg-gradient-to-br from-purple-50 to-purple-100",
+    },
+    {
+      title: "About Us",
+      description: "Learn more about us",
+      icon: <FaAddressBook className="h-8 w-8 text-red-500" />,
+      path: "/dashboard/about",
+      color: "bg-gradient-to-br from-red-50 to-red-100",
     },
   ];
 

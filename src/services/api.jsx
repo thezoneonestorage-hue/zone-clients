@@ -1,4 +1,29 @@
 import axios from "axios";
+import {
+  FaAward,
+  FaBehance,
+  FaChevronLeft,
+  FaChevronRight,
+  FaEye,
+  FaFacebook,
+  FaFilm,
+  FaGithub,
+  FaGlobe,
+  FaInstagram,
+  FaLightbulb,
+  FaLinkedin,
+  FaMagic,
+  FaMusic,
+  FaPalette,
+  FaPause,
+  FaPlay,
+  FaQuoteLeft,
+  FaStar,
+  FaTrophy,
+  FaTwitter,
+  FaVideo,
+  FaYoutube,
+} from "react-icons/fa";
 
 const API_URL =
   import.meta.env.VITE_NODE_ENV === "production"
@@ -446,6 +471,184 @@ export const uploadFile = async (file) => {
     url: data.secure_url,
     public_id: data.public_id,
   };
+};
+
+// About Page API
+export const getAboutPage = async () => {
+  const response = await api.get("/about");
+  return response.data;
+};
+
+// Admin About Page API
+export const getAllAboutPages = async (params = {}) => {
+  const response = await api.get("/about/admin", { params });
+  return response.data;
+};
+
+export const getAboutPageById = async (id) => {
+  const response = await api.get(`/about/admin/${id}`);
+  return response.data;
+};
+
+export const createAboutPage = async (aboutData) => {
+  const response = await api.post("/about/admin", aboutData);
+  return response.data;
+};
+
+export const updateAboutPage = async (id, aboutData) => {
+  const response = await api.patch(`/about/admin/${id}`, aboutData);
+  return response.data;
+};
+
+export const deleteAboutPage = async (id) => {
+  const response = await api.delete(`/about/admin/${id}`);
+  return response.data;
+};
+
+// Team Members Management
+export const addTeamMember = async (aboutPageId, teamMemberData) => {
+  const response = await api.post(
+    `/about/admin/${aboutPageId}/team-members`,
+    teamMemberData
+  );
+  return response.data;
+};
+
+export const updateTeamMember = async (
+  aboutPageId,
+  teamMemberId,
+  teamMemberData
+) => {
+  const response = await api.patch(
+    `/about/admin/${aboutPageId}/team-members/${teamMemberId}`,
+    teamMemberData
+  );
+  return response.data;
+};
+
+export const deleteTeamMember = async (aboutPageId, teamMemberId) => {
+  const response = await api.delete(
+    `/about/admin/${aboutPageId}/team-members/${teamMemberId}`
+  );
+  return response.data;
+};
+
+// Achievements Management
+export const addAchievement = async (aboutPageId, achievementData) => {
+  const response = await api.post(
+    `/about/admin/${aboutPageId}/achievements`,
+    achievementData
+  );
+  return response.data;
+};
+
+export const updateAchievement = async (
+  aboutPageId,
+  achievementId,
+  achievementData
+) => {
+  const response = await api.patch(
+    `/about/admin/${aboutPageId}/achievements/${achievementId}`,
+    achievementData
+  );
+  return response.data;
+};
+
+export const deleteAchievement = async (aboutPageId, achievementId) => {
+  const response = await api.delete(
+    `/about/admin/${aboutPageId}/achievements/${achievementId}`
+  );
+  return response.data;
+};
+
+// Brand Logos Management
+export const addBrandLogo = async (aboutPageId, brandLogoData) => {
+  const response = await api.post(
+    `/about/admin/${aboutPageId}/brand-logos`,
+    brandLogoData
+  );
+  return response.data;
+};
+
+export const updateBrandLogo = async (
+  aboutPageId,
+  brandLogoId,
+  brandLogoData
+) => {
+  const response = await api.patch(
+    `/about/admin/${aboutPageId}/brand-logos/${brandLogoId}`,
+    brandLogoData
+  );
+  return response.data;
+};
+
+export const deleteBrandLogo = async (aboutPageId, brandLogoId) => {
+  const response = await api.delete(
+    `/about/admin/${aboutPageId}/brand-logos/${brandLogoId}`
+  );
+  return response.data;
+};
+
+// Icon mapping for dynamic icon rendering
+export const iconMap = {
+  FaLinkedin: FaLinkedin,
+  FaTwitter: FaTwitter,
+  FaInstagram: FaInstagram,
+  FaGithub: FaGithub,
+  FaBehance: FaBehance,
+  FaYoutube: FaYoutube,
+  FaVideo: FaVideo,
+  FaPalette: FaPalette,
+  FaMusic: FaMusic,
+  FaFilm: FaFilm,
+  FaMagic: FaMagic,
+  FaEye: FaEye,
+  FaFacebook: FaFacebook,
+  FaGlobe: FaGlobe,
+  FaStar: FaStar,
+  FaAward: FaAward,
+  FaTrophy: FaTrophy,
+  FaLightbulb: FaLightbulb,
+  FaChevronLeft: FaChevronLeft,
+  FaChevronRight: FaChevronRight,
+  FaPlay: FaPlay,
+  FaPause: FaPause,
+  FaQuoteLeft: FaQuoteLeft,
+};
+
+// Enhanced About Page API Functions
+export const getAboutPageWithDetails = async (id) => {
+  const response = await api.get(`/about/admin/${id}/full`);
+  return response.data;
+};
+
+export const updateOrder = async (type, aboutPageId, items) => {
+  const response = await api.post(`/about/admin/${aboutPageId}/order/${type}`, {
+    items,
+  });
+  return response.data;
+};
+
+export const toggleActiveStatus = async (type, aboutPageId, itemId) => {
+  const response = await api.patch(
+    `/about/admin/${aboutPageId}/${type}/${itemId}/toggle`
+  );
+  return response.data;
+};
+
+export const duplicateAboutPage = async (id) => {
+  const response = await api.post(`/about/admin/${id}/duplicate`);
+  return response.data;
+};
+
+export const exportAboutPage = async (id) => {
+  const response = await api.get(`/about/admin/${id}/export`);
+  return response.data;
+};
+
+export const importAboutPage = async (data) => {
+  const response = await api.post("/about/admin/import", data);
+  return response.data;
 };
 
 export default api;

@@ -6,6 +6,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./page/Login";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import NotFound from "./components/Shared/NotFundPage";
+import AboutPageAdmin from "./page/AboutPageAdmin";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./page/Home"));
@@ -30,6 +31,14 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Home />
+          </Suspense>
+        ),
+      },
+      {
+        path: "home",
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <Home />
@@ -161,6 +170,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <StatisticsManagement />
+          </Suspense>
+        ),
+      },
+      {
+        path: "about",
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <AboutPageAdmin />
           </Suspense>
         ),
       },

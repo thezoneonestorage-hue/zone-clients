@@ -3,7 +3,7 @@ import { motion, useInView, useAnimation } from "framer-motion";
 import { getActiveStatistics, getVideoReviews } from "../../services/api";
 import SectionHeader from "../Shared/SectionHeader";
 
-const MotionCredibilityStrip = () => {
+const MotionCredit = () => {
   const controls = useAnimation();
   const ref = useRef(null);
   const canvasRef = useRef(null);
@@ -824,4 +824,4 @@ const MotionCredibilityStrip = () => {
   );
 };
 
-export default MotionCredibilityStrip;
+export default MotionCredit;

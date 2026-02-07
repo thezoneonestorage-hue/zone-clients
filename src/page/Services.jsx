@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useInView,
+  useAnimation,
+} from "framer-motion";
 import {
   FaVideo,
   FaFilm,
@@ -18,10 +23,6 @@ import {
   FaLayerGroup,
 } from "react-icons/fa";
 import { GiFilmSpool } from "react-icons/gi";
-import prosess from "../assets/prosess.png";
-import development from "../assets/video-development.jpg";
-import delivery from "../assets/video-delivry.png";
-import production from "../assets/production.jpg";
 import davinchi from "../assets/davenchi.png";
 import premier from "../assets/premier.png";
 import cap_cut from "../assets/cap-cut.png";
@@ -29,7 +30,12 @@ import after_effect from "../assets/after-effect.png";
 import blender from "../assets/blender.png";
 import final_cut from "../assets/final-cut.png";
 import SectionHeader from "../components/Shared/SectionHeader";
-import { getServices } from "../services/api";
+import {
+  getServices,
+  getActiveStatistics,
+  getVideoReviews,
+  getReviews,
+} from "../services/api";
 
 // Icon mapping for services
 const serviceIcons = {
@@ -214,6 +220,149 @@ const FloatingAppLogos = () => {
   );
 };
 
+// Responsive Animated Logo Cards for Differentiators
+const AnimatedLogoCard = ({ item, index }) => {
+  return (
+    <motion.div
+      className={`relative p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 ${item.borderColor} ${item.bgColor} backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer`}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      whileHover={{
+        scale: window.innerWidth < 768 ? 1.01 : 1.02,
+        y: window.innerWidth < 768 ? -2 : -5,
+      }}
+    >
+      {/* Metric Badge - Smaller on mobile */}
+      <div
+        className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-gradient-to-r ${item.color} text-white text-xs sm:text-sm font-bold shadow-lg z-10`}
+      >
+        {item.metric}
+      </div>
+
+      {/* Icon - Smaller on mobile */}
+      <motion.div
+        className="text-2xl sm:text-4xl mb-3 sm:mb-4 relative z-10"
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        {item.icon}
+      </motion.div>
+
+      {/* Title - Smaller text on mobile */}
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 relative z-10">
+        {item.title}
+      </h3>
+
+      {/* Description - Smaller text on mobile */}
+      <p className="text-gray-700 text-xs sm:text-sm leading-relaxed relative z-10">
+        {item.description}
+      </p>
+    </motion.div>
+  );
+};
+
+// Responsive Animated Comparison Card - Fixed with consistent bottom advantage text
+const AnimatedComparisonCard = ({ item, index }) => {
+  return (
+    <motion.div
+      key={index}
+      className="text-center p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl border border-gray-100 hover:border-teal-200 transition-all duration-300 relative overflow-hidden group hover:shadow-lg"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{
+        scale: window.innerWidth < 768 ? 1.02 : 1.05,
+        boxShadow: "0 20px 40px -10px rgba(13, 148, 136, 0.1)",
+      }}
+    >
+      <div className="text-xs sm:text-sm text-gray-500 mb-3 font-medium relative z-10 uppercase tracking-wide">
+        {item.aspect}
+      </div>
+
+      <div className="flex items-center justify-between mb-2 relative z-10">
+        <div className="text-center flex-1">
+          <div className="text-xs text-gray-400 mb-1">Others</div>
+          <div className="text-sm sm:text-base text-gray-600 line-through font-medium px-2 py-1 bg-gray-100 rounded-lg">
+            {item.others}
+          </div>
+        </div>
+
+        <motion.div
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 flex items-center justify-center mx-2 sm:mx-3 flex-shrink-0 shadow-lg"
+          whileHover={{ scale: 1.2, rotate: 180 }}
+          transition={{ type: "spring", stiffness: 400 }}
+        >
+          <svg
+            className="w-4 h-4 sm:w-5 sm:h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="3"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            />
+          </svg>
+        </motion.div>
+
+        <div className="text-center flex-1">
+          <div className="text-xs text-teal-600 font-medium mb-1">We Offer</div>
+          <div className="text-sm sm:text-base font-semibold text-gray-900 px-2 py-1 bg-teal-50 rounded-lg border border-teal-100">
+            {item.you}
+          </div>
+        </div>
+      </div>
+
+      {/* Advantage text at the bottom - Consistent for all cards */}
+      <div className="mt-4 pt-3 border-t border-gray-100">
+        <div className="inline-block px-4 py-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg text-xs sm:text-sm font-bold relative z-10 shadow-md">
+          {item.advantage}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Video Player Component
+const VideoPlayer = ({ videoUrl, thumbnail, isBest, duration }) => {
+  const isMobile = window.innerWidth < 768;
+
+  return (
+    <div
+      className={`relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-2xl ${
+        isMobile ? "h-48" : "h-64 lg:h-80"
+      } bg-black`}
+    >
+      {/* Default HTML5 Video Player */}
+      <video
+        className="w-full h-full object-cover"
+        poster={thumbnail}
+        controls
+        controlsList="nodownload"
+        preload="metadata"
+      >
+        <source src={videoUrl} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {/* Best Review Badge */}
+      {isBest && (
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-yellow-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-medium z-10">
+          ⭐ Featured
+        </div>
+      )}
+
+      {/* Video Duration */}
+      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-black/80 text-white px-2 py-1 rounded text-xs sm:text-sm">
+        {duration}
+      </div>
+    </div>
+  );
+};
+
 const Services = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -221,75 +370,84 @@ const Services = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Enhanced workflow steps with mobile optimizations
-  const workflowSteps = [
+  // New state for video reviews and statistics
+  const [videoReviews, setVideoReviews] = useState([]);
+  const [statistics, setStatistics] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Real Differentiators - Updated Unlimited Revisions description
+  const differentiators = [
     {
-      title: "Discovery & Strategy",
+      icon: "⏰",
+      title: "24-48 Hour Delivery",
       description:
-        "We dive deep into your vision, goals, and target audience to create a winning strategy",
-      icon: <FaRocketchat className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "from-teal-400 to-teal-500",
-      duration: "1-2 days",
-      features: [
-        "Creative Brief",
-        "Target Analysis",
-        "Content Strategy",
-        "Goal Setting",
-      ],
-      image: prosess,
-      imageAlt: "Discovery and strategy process",
-      shape: "rounded-t-xl",
+        "While others take 5-7 days, we deliver professional edits in 1-2 days without rushing or compromising quality.",
+      metric: "Fastest",
+      color: "from-green-500 to-teal-500",
+      borderColor: "border-green-200",
+      bgColor: "bg-gradient-to-br from-green-50 to-teal-50",
     },
     {
-      title: "Creative Development",
+      icon: "💬",
+      title: "Real-Time Collaboration",
       description:
-        "Our team crafts stunning visuals and compelling narratives that bring your story to life",
-      icon: <FaPalette className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "from-teal-300 to-teal-400",
-      duration: "2-4 days",
-      features: [
-        "Storyboarding",
-        "Visual Design",
-        "Script Writing",
-        "Style Frames",
-      ],
-      image: development,
-      imageAlt: "Creative development process",
-      shape: "rounded-t-xl",
+        "Work directly with your editor via live chat and screen sharing. No more waiting days for email responses.",
+      metric: "Live Editing",
+      color: "from-blue-500 to-cyan-500",
+      borderColor: "border-blue-200",
+      bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50",
     },
     {
-      title: "Production & Editing",
+      icon: "🔄",
+      title: "Flexible Revisions",
       description:
-        "We execute with precision using cutting-edge tools and techniques for flawless results",
-      icon: <FaVideo className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "from-teal-400 to-teal-500",
-      duration: "3-5 days",
-      features: [
-        "Video Editing",
-        "Motion Graphics",
-        "Color Grading",
-        "Sound Design",
-      ],
-      image: production,
-      imageAlt: "Production and editing process",
-      shape: "rounded-t-xl",
+        "Most editors charge extra for revisions. We offer reasonable revision rounds to ensure your complete satisfaction.",
+      metric: "Quality Focused",
+      color: "from-purple-500 to-indigo-500",
+      borderColor: "border-purple-200",
+      bgColor: "bg-gradient-to-br from-purple-50 to-indigo-50",
     },
     {
-      title: "Refinement & Delivery",
+      icon: "🎵",
+      title: "Copyright-Free Music",
       description:
-        "We polish every detail and deliver your project in all required formats, ready to shine",
-      icon: <FaShippingFast className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "from-teal-300 to-teal-400",
-      duration: "1-2 days",
-      features: [
-        "Quality Check",
-        "Client Review",
-        "Format Optimization",
-        "Final Delivery",
-      ],
-      image: delivery,
-      imageAlt: "Refinement and delivery process",
-      shape: "rounded-t-xl",
+        "We provide access to premium, copyright-free music libraries so your videos never get taken down.",
+      metric: "Safe Music",
+      color: "from-orange-500 to-amber-500",
+      borderColor: "border-orange-200",
+      bgColor: "bg-gradient-to-br from-orange-50 to-amber-50",
+    },
+  ];
+
+  // Real Comparison - Updated with better text and consistent advantage buttons
+  const comparisonData = [
+    {
+      aspect: "Delivery Time",
+      you: "24-48 hours 1-2 days",
+      others: "5-7 days",
+      advantage: "3x Faster Delivery",
+    },
+    {
+      aspect: "Communication",
+      you: "Live chat & calls",
+      others: "Email only",
+      advantage: "Instant Response",
+    },
+    {
+      aspect: "Revisions",
+      you: "Flexible revisions",
+      others: "Limited or extra cost",
+      advantage: "Better Value",
+    },
+    {
+      aspect: "Music Rights",
+      you: "Copyright-free library",
+      others: "You provide music",
+      advantage: "Worry-Free Usage",
     },
   ];
 
@@ -321,7 +479,7 @@ const Services = () => {
               : "3-5 business days",
             revisions: service.revisions
               ? `${service.revisions} rounds included`
-              : "2 rounds included",
+              : "Reasonable revisions included",
             ...service,
           }));
 
@@ -341,6 +499,504 @@ const Services = () => {
     fetchServices();
   }, []);
 
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
+  }, []);
+
+  // Fetch statistics data
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        setStatsLoading(true);
+        const response = await getActiveStatistics();
+        setStatistics(response.data?.statistics || []);
+      } catch (err) {
+        console.error("Error fetching statistics:", err);
+        setStatistics([
+          { value: "500+", title: "Videos Delivered" },
+          { value: "40+", title: "Trusted Brands" },
+          { value: "3+", title: "Years Experience" },
+        ]);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, []);
+
+  // Fetch video reviews from API
+  useEffect(() => {
+    const fetchVideoReviews = async () => {
+      try {
+        setReviewsLoading(true);
+        const response = await getVideoReviews();
+
+        const transformedReviews =
+          response.data?.reviews?.map((review, index) => ({
+            id: review._id || review.id || index,
+            name: review.userName,
+            role: review.user?.role || "Client",
+            company: review.user?.company || "Satisfied Client",
+            videoThumbnail: getVideoThumbnail(review.video),
+            review: review.content,
+            rating: review.rating,
+            stats: getPerformanceStats(review.rating),
+            duration: getVideoDuration(review.video),
+            videoUrl: review.video,
+            isBest: review.isBest,
+            user: review.user,
+          })) || [];
+
+        setVideoReviews(transformedReviews);
+      } catch (err) {
+        console.error("Error fetching video reviews:", err);
+        setVideoReviews(getFallbackReviews());
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchVideoReviews();
+  }, []);
+
+  // Helper functions for video reviews
+  const getVideoThumbnail = (videoUrl) => {
+    if (!videoUrl) return getDefaultThumbnail();
+    if (videoUrl.includes("cloudinary.com")) {
+      return videoUrl.replace(
+        "/upload/",
+        "/upload/w_600,h_400,c_fill,q_auto,f_auto/"
+      );
+    }
+    return getDefaultThumbnail();
+  };
+
+  const getVideoDuration = (videoUrl) => {
+    const durations = ["1:45", "2:30", "3:15", "4:20", "2:50"];
+    return durations[Math.floor(Math.random() * durations.length)];
+  };
+
+  const getDefaultThumbnail = () => {
+    const thumbnails = [
+      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=400&fit=crop&crop=face",
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=400&fit=crop",
+    ];
+    return thumbnails[Math.floor(Math.random() * thumbnails.length)];
+  };
+
+  const getPerformanceStats = (rating) => {
+    const stats = {
+      1: "Quality work delivered",
+      2: "Good results achieved",
+      3: "Great engagement boost",
+      4: "Excellent editing quality",
+      5: "Exceptional service delivery",
+    };
+    return stats[rating] || "Professional service delivered";
+  };
+
+  const getFallbackReviews = () => [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      role: "Content Creator",
+      company: "Beauty Vlog",
+      videoThumbnail:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=400&fit=crop",
+      review:
+        "I was amazed by how quickly they turned around my weekly vlog. The editing was so professional and they perfectly captured my brand's aesthetic. The color grading made my footage look cinematic!",
+      rating: 5,
+      stats: "3x faster delivery than my previous editor",
+      duration: "2:34",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      isBest: true,
+    },
+    {
+      id: 2,
+      name: "Mike Chen",
+      role: "Marketing Director",
+      company: "TechStart Inc",
+      videoThumbnail:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+      review:
+        "Our product launch video needed to be perfect, and they delivered beyond expectations. The attention to detail in the motion graphics and sound design was exceptional. Our engagement rates skyrocketed!",
+      rating: 5,
+      stats: "215% increase in engagement",
+      duration: "1:45",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      isBest: false,
+    },
+    {
+      id: 3,
+      name: "Emily Rodriguez",
+      role: "Documentary Filmmaker",
+      company: "Independent Films",
+      videoThumbnail:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=400&fit=crop",
+      review:
+        "As a documentary filmmaker, storytelling is everything. They understood my vision completely and helped me craft a narrative that moved my audience. The pacing and emotional impact were perfect.",
+      rating: 5,
+      stats: "Film festival selection",
+      duration: "3:12",
+      videoUrl:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      isBest: true,
+    },
+  ];
+
+  // Auto-advance video reviews
+  useEffect(() => {
+    if (videoReviews.length === 0) return;
+
+    const interval = setInterval(() => {
+      setDirection(1);
+      setCurrentReviewIndex((prev) => (prev + 1) % videoReviews.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [videoReviews.length]);
+
+  // Navigation functions
+  const nextReview = () => {
+    if (videoReviews.length === 0) return;
+    setDirection(1);
+    setCurrentReviewIndex((prev) => (prev + 1) % videoReviews.length);
+  };
+
+  const prevReview = () => {
+    if (videoReviews.length === 0) return;
+    setDirection(-1);
+    setCurrentReviewIndex(
+      (prev) => (prev - 1 + videoReviews.length) % videoReviews.length
+    );
+  };
+
+  // Slide variants for smooth transitions
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction > 0 ? -300 : 300,
+      opacity: 0,
+    }),
+  };
+
+  const slideTransition = {
+    x: { type: "spring", stiffness: 300, damping: 30 },
+    opacity: { duration: 0.2 },
+  };
+
+  // Star rating component
+  const StarRating = ({ rating }) => {
+    return (
+      <div className="flex items-center space-x-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <motion.span
+            key={star}
+            className={`text-lg ${
+              star <= rating ? "text-yellow-400" : "text-gray-400"
+            }`}
+            whileHover={{ scale: 1.2, rotate: 10 }}
+            transition={{ type: "spring", stiffness: 400 }}
+          >
+            ★
+          </motion.span>
+        ))}
+      </div>
+    );
+  };
+
+  // Updated Video Review Component
+  const VideoReviewSection = () => {
+    if (reviewsLoading) {
+      return (
+        <div className="mb-12 sm:mb-20 text-center py-8 sm:py-12">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-teal-500 border-t-transparent rounded-full mx-auto"
+          />
+          <span className="ml-2 sm:ml-3 text-gray-600 text-sm sm:text-base">
+            Loading video reviews...
+          </span>
+        </div>
+      );
+    }
+
+    if (videoReviews.length === 0) {
+      return (
+        <div className="mb-12 sm:mb-20 text-center py-8 sm:py-12">
+          <div className="text-gray-500 text-sm sm:text-base">
+            No video reviews available yet
+          </div>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">
+            Check back later for client video testimonials
+          </p>
+        </div>
+      );
+    }
+
+    const currentReview = videoReviews[currentReviewIndex];
+
+    return (
+      <div className="mb-12 sm:mb-20">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+            Real Client Results
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-lg px-4">
+            See how we've helped content creators and businesses achieve their
+            goals with professional video editing
+          </p>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4">
+          {/* Card Container */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-gray-200 shadow-xl sm:shadow-2xl overflow-hidden relative">
+            {/* Navigation Buttons - Only show if multiple reviews */}
+            {videoReviews.length > 1 && (
+              <div
+                className={`absolute top-1/2 left-3 right-3 sm:left-4 sm:right-4 transform -translate-y-1/2 flex justify-between z-10`}
+              >
+                <motion.button
+                  onClick={prevReview}
+                  className={`${
+                    isMobile ? "w-8 h-8" : "w-12 h-12"
+                  } bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white border border-gray-200 relative z-20`}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg
+                    className={`${
+                      isMobile ? "w-4 h-4" : "w-6 h-6"
+                    } text-gray-700`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </motion.button>
+
+                <motion.button
+                  onClick={nextReview}
+                  className={`${
+                    isMobile ? "w-8 h-8" : "w-12 h-12"
+                  } bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white border border-gray-200 relative z-20`}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg
+                    className={`${
+                      isMobile ? "w-4 h-4" : "w-6 h-6"
+                    } text-gray-700`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </motion.button>
+              </div>
+            )}
+
+            <div
+              className={`grid grid-cols-1 ${
+                isMobile ? "" : "lg:grid-cols-2"
+              } min-h-[${isMobile ? "400px" : "500px"}] relative z-10`}
+            >
+              {/* Video Section */}
+              <div
+                className={`relative ${
+                  isMobile ? "p-4" : "p-8"
+                } bg-gradient-to-br from-gray-50 to-white`}
+              >
+                {/* Video Container with Default Player */}
+                <VideoPlayer
+                  videoUrl={currentReview.videoUrl}
+                  thumbnail={currentReview.videoThumbnail}
+                  isBest={currentReview.isBest}
+                  duration={currentReview.duration}
+                />
+
+                {/* Client Info with Slide Transition */}
+                <div
+                  className={`mt-4 sm:mt-6 text-center ${
+                    isMobile ? "h-20" : "h-24"
+                  }`}
+                >
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                      key={currentReview.id}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={slideTransition}
+                    >
+                      <h3
+                        className={`${
+                          isMobile ? "text-lg" : "text-xl"
+                        } font-bold text-gray-900`}
+                      >
+                        {currentReview.name}
+                      </h3>
+                      <p className="text-teal-600 font-medium text-sm sm:text-base">
+                        {currentReview.role}
+                      </p>
+                      <p className="text-gray-500 text-xs sm:text-sm">
+                        {currentReview.company}
+                      </p>
+                      <div className="mt-1 sm:mt-2 flex justify-center">
+                        <StarRating rating={currentReview.rating} />
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Review Text Section */}
+              <div
+                className={`${
+                  isMobile ? "p-4" : "p-8"
+                } flex flex-col justify-center`}
+              >
+                <div className={`${isMobile ? "mb-4" : "mb-6"}`}>
+                  <div className="text-teal-500 text-4xl sm:text-6xl mb-3 sm:mb-4">
+                    "
+                  </div>
+
+                  {/* Review Text with Slide Transition */}
+                  <div
+                    className={`${isMobile ? "h-32" : "h-48"} overflow-hidden`}
+                  >
+                    <AnimatePresence mode="wait" custom={direction}>
+                      <motion.p
+                        key={currentReview.id}
+                        className="text-gray-700 text-sm sm:text-lg leading-relaxed"
+                        custom={direction}
+                        variants={slideVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={slideTransition}
+                      >
+                        {currentReview.review}
+                      </motion.p>
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Stats Badge with Slide Transition */}
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                      key={currentReview.stats}
+                      className="bg-teal-50 inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 rounded-full mt-3 sm:mt-4"
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={slideTransition}
+                    >
+                      <span className="text-teal-700 font-semibold text-xs sm:text-sm">
+                        🎯 {currentReview.stats}
+                      </span>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Navigation Dots and Counter - Only show if multiple reviews */}
+                {videoReviews.length > 1 && (
+                  <div className="flex items-center justify-between mt-4 sm:mt-8">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                      {videoReviews.map((_, index) => (
+                        <motion.button
+                          key={index}
+                          onClick={() => {
+                            const newDirection =
+                              index > currentReviewIndex ? 1 : -1;
+                            setDirection(newDirection);
+                            setCurrentReviewIndex(index);
+                          }}
+                          className={`${
+                            isMobile ? "w-2 h-2" : "w-3 h-3"
+                          } rounded-full transition-all duration-300 ${
+                            index === currentReviewIndex
+                              ? "bg-teal-500 scale-125"
+                              : "bg-gray-300 hover:bg-gray-400"
+                          }`}
+                          whileHover={{ scale: 1.3 }}
+                          whileTap={{ scale: 0.8 }}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="text-gray-500 text-xs sm:text-sm">
+                      {currentReviewIndex + 1} of {videoReviews.length}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Statistics functions
+  const getStatisticByTitle = (title) => {
+    return statistics.find((stat) =>
+      stat.title.toLowerCase().includes(title.toLowerCase())
+    );
+  };
+
+  const getVideosValue = () => {
+    const projectStat = getStatisticByTitle("project");
+    return projectStat ? `${projectStat.value}+` : "500+";
+  };
+
+  const getBrandsValue = () => {
+    const brandStat = getStatisticByTitle("brand");
+    return brandStat ? `${brandStat.value}+` : "40+";
+  };
+
+  const getYearsValue = () => {
+    const yearStat = getStatisticByTitle("year");
+    return yearStat ? `${yearStat.value}+` : "3+";
+  };
+
   // Handle Learn More click
   const handleLearnMore = (service) => {
     setSelectedService(service);
@@ -356,51 +1012,240 @@ const Services = () => {
   // Create marquee data only if we have services
   const marqueeServices = services.length > 0 ? [...services, ...services] : [];
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="relative min-h-screen w-full bg-white flex items-center justify-center pt-20 pb-10">
-        <div className="relative z-10 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading services...</p>
+  // Loading state for just the services section
+  const renderServicesSection = () => {
+    if (loading) {
+      return (
+        <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading services...</p>
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // Error state
-  if (error && services.length === 0) {
-    return (
-      <div className="relative min-h-screen w-full bg-white flex items-center justify-center pt-20 pb-10">
-        <div className="relative z-10 text-gray-600 text-lg text-center px-4">
-          <p className="mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-teal-400 text-white rounded-lg hover:bg-teal-500 transition-colors"
-          >
-            Try Again
-          </button>
+    if (error && services.length === 0) {
+      return (
+        <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center px-4">
+              <div className="text-5xl mb-4 text-teal-400">🎬</div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                Services Not Available
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-teal-400 text-white rounded-lg hover:bg-teal-500 transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // Empty state
-  if (!loading && services.length === 0) {
-    return (
-      <div className="relative min-h-screen w-full bg-white flex items-center justify-center pt-20 pb-10">
-        <div className="relative z-10 text-gray-600 text-lg text-center px-4">
-          <p className="mb-4">No services available at the moment.</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-teal-400 text-white rounded-lg hover:bg-teal-500 transition-colors"
-          >
-            Refresh
-          </button>
+    if (!loading && services.length === 0) {
+      return (
+        <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center px-4">
+              <div className="text-5xl mb-4 text-teal-400">🎬</div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                No Services Available
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                We're currently updating our service offerings. Please check
+                back soon or contact us for custom projects.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-teal-400 text-white rounded-lg hover:bg-teal-500 transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
         </div>
+      );
+    }
+
+    // Normal services marquee rendering when we have services
+    return (
+      <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+        {/* Single Marquee for Mobile, Double for Desktop */}
+        <div className="hidden sm:block">
+          {/* Top Marquee - Desktop Only */}
+          <div className="flex mb-6">
+            <div className="flex space-x-4 sm:space-x-5 animate-marquee-left">
+              {marqueeServices
+                .slice(0, Math.min(8, marqueeServices.length))
+                .map((service, index) => (
+                  <motion.div
+                    key={`${service._id}-top-${index}`}
+                    className="flex-shrink-0 w-[300px] sm:w-[380px]"
+                    whileHover={{ y: -5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-teal-200 shadow-lg sm:shadow-xl shadow-teal-100 relative overflow-hidden h-full min-h-[180px] sm:min-h-[220px] flex flex-col group hover:shadow-xl sm:hover:shadow-2xl hover:border-teal-300 transition-all duration-300">
+                      <div className="relative z-10 flex flex-col items-center h-full text-center">
+                        {/* Icon Container */}
+                        <motion.div
+                          className="p-3 sm:p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg shadow-teal-100 mb-3 sm:mb-4 border border-teal-200"
+                          whileHover={{
+                            scale: 1.05,
+                            rotate: window.innerWidth >= 640 ? 5 : 0,
+                          }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <div className="text-teal-500">{service.icon}</div>
+                        </motion.div>
+
+                        {/* Title */}
+                        <h3 className="mb-2 sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
+                          {service.title}
+                        </h3>
+
+                        {/* Accent Line */}
+                        <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full mb-3 sm:mb-4" />
+
+                        {/* Description */}
+                        <p className="flex-1 text-xs sm:text-sm font-light leading-relaxed text-gray-600">
+                          {service.description}
+                        </p>
+
+                        {/* Learn More Button */}
+                        <motion.button
+                          className="mt-3 sm:mt-4 px-3 py-1.5 sm:px-4 sm:py-2 bg-teal-50 text-teal-600 rounded-lg text-xs sm:text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 border border-teal-200 hover:bg-teal-100 hover:border-teal-300"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleLearnMore(service)}
+                        >
+                          Learn More
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+
+          {/* Bottom Marquee - Desktop Only */}
+          <div className="flex">
+            <div className="flex space-x-4 sm:space-x-5 animate-marquee-right">
+              {marqueeServices
+                .slice(
+                  Math.min(4, marqueeServices.length),
+                  Math.min(12, marqueeServices.length)
+                )
+                .map((service, index) => (
+                  <motion.div
+                    key={`${service._id}-bottom-${index}`}
+                    className="flex-shrink-0 w-[300px] sm:w-[380px]"
+                    whileHover={{ y: -5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-teal-200 shadow-lg sm:shadow-xl shadow-teal-100 relative overflow-hidden h-full min-h-[180px] sm:min-h-[220px] flex flex-col group hover:shadow-xl sm:hover:shadow-2xl hover:border-teal-300 transition-all duration-300">
+                      <div className="relative z-10 flex flex-col items-center h-full text-center">
+                        {/* Icon Container */}
+                        <motion.div
+                          className="p-3 sm:p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg shadow-teal-100 mb-3 sm:mb-4 border border-teal-200"
+                          whileHover={{
+                            scale: 1.05,
+                            rotate: window.innerWidth >= 640 ? -5 : 0,
+                          }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <div className="text-teal-500">{service.icon}</div>
+                        </motion.div>
+
+                        {/* Title */}
+                        <h3 className="mb-2 sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
+                          {service.title}
+                        </h3>
+
+                        {/* Accent Line */}
+                        <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full mb-3 sm:mb-4" />
+
+                        {/* Description */}
+                        <p className="flex-1 text-xs sm:text-sm font-light leading-relaxed text-gray-600">
+                          {service.description}
+                        </p>
+
+                        {/* Learn More Button */}
+                        <motion.button
+                          className="mt-3 sm:mt-4 px-3 py-1.5 sm:px-4 sm:py-2 bg-teal-50 text-teal-600 rounded-lg text-xs sm:text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 border border-teal-200 hover:bg-teal-100 hover:border-teal-300"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleLearnMore(service)}
+                        >
+                          Learn More
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Single Marquee for Mobile */}
+        <div className="sm:hidden">
+          <div className="flex">
+            <div className="flex space-x-4 animate-marquee-left">
+              {marqueeServices
+                .slice(0, Math.min(6, marqueeServices.length))
+                .map((service, index) => (
+                  <motion.div
+                    key={`${service._id}-mobile-${index}`}
+                    className="flex-shrink-0 w-[280px]"
+                  >
+                    <div className="bg-white rounded-xl p-4 border border-teal-200 shadow-lg shadow-teal-100 relative overflow-hidden h-full min-h-[160px] flex flex-col group">
+                      <div className="relative z-10 flex flex-col items-center h-full text-center">
+                        {/* Icon Container */}
+                        <div className="p-3 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-md shadow-teal-100 mb-3 border border-teal-200">
+                          <div className="text-teal-500">{service.icon}</div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="mb-2 text-sm font-bold leading-tight tracking-tight text-gray-800">
+                          {service.title}
+                        </h3>
+
+                        {/* Accent Line */}
+                        <div className="w-12 h-0.5 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full mb-2" />
+
+                        {/* Description */}
+                        <p className="flex-1 text-xs font-light leading-relaxed text-gray-600">
+                          {service.description}
+                        </p>
+
+                        {/* Learn More Button */}
+                        <motion.button
+                          className="mt-2 px-3 py-1.5 bg-teal-50 text-teal-600 rounded-lg text-xs border border-teal-200 hover:bg-teal-100 hover:border-teal-300"
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleLearnMore(service)}
+                        >
+                          Learn More
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Gradient Overlays */}
+        <div className="absolute top-0 left-0 z-20 w-16 sm:w-32 h-full pointer-events-none bg-gradient-to-r from-white to-transparent" />
+        <div className="absolute top-0 right-0 z-20 w-16 sm:w-32 h-full pointer-events-none bg-gradient-to-l from-white to-transparent" />
       </div>
     );
-  }
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-white flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 sm:pb-10 overflow-hidden">
@@ -488,201 +1333,25 @@ const Services = () => {
           />
         </div>
 
-        {/* Marquee Section - Mobile Optimized */}
-        {services.length > 0 && (
-          <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
-            {/* Single Marquee for Mobile, Double for Desktop */}
-            <div className="hidden sm:block">
-              {/* Top Marquee - Desktop Only */}
-              <div className="flex mb-6">
-                <div className="flex space-x-4 sm:space-x-5 animate-marquee-left">
-                  {marqueeServices
-                    .slice(0, Math.min(8, marqueeServices.length))
-                    .map((service, index) => (
-                      <motion.div
-                        key={`${service._id}-top-${index}`}
-                        className="flex-shrink-0 w-[300px] sm:w-[380px]"
-                        whileHover={{ y: -5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-teal-200 shadow-lg sm:shadow-xl shadow-teal-100 relative overflow-hidden h-full min-h-[180px] sm:min-h-[220px] flex flex-col group hover:shadow-xl sm:hover:shadow-2xl hover:border-teal-300 transition-all duration-300">
-                          <div className="relative z-10 flex flex-col items-center h-full text-center">
-                            {/* Icon Container */}
-                            <motion.div
-                              className="p-3 sm:p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg shadow-teal-100 mb-3 sm:mb-4 border border-teal-200"
-                              whileHover={{
-                                scale: 1.05,
-                                rotate: window.innerWidth >= 640 ? 5 : 0,
-                              }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              <div className="text-teal-500">
-                                {service.icon}
-                              </div>
-                            </motion.div>
+        {/* Services Marquee Section - Now contains loading/error/empty states */}
+        {renderServicesSection()}
 
-                            {/* Title */}
-                            <h3 className="mb-2 sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
-                              {service.title}
-                            </h3>
-
-                            {/* Accent Line */}
-                            <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full mb-3 sm:mb-4" />
-
-                            {/* Description */}
-                            <p className="flex-1 text-xs sm:text-sm font-light leading-relaxed text-gray-600">
-                              {service.description}
-                            </p>
-
-                            {/* Learn More Button */}
-                            <motion.button
-                              className="mt-3 sm:mt-4 px-3 py-1.5 sm:px-4 sm:py-2 bg-teal-50 text-teal-600 rounded-lg text-xs sm:text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 border border-teal-200 hover:bg-teal-100 hover:border-teal-300"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => handleLearnMore(service)}
-                            >
-                              Learn More
-                            </motion.button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                </div>
-              </div>
-
-              {/* Bottom Marquee - Desktop Only */}
-              <div className="flex">
-                <div className="flex space-x-4 sm:space-x-5 animate-marquee-right">
-                  {marqueeServices
-                    .slice(
-                      Math.min(4, marqueeServices.length),
-                      Math.min(12, marqueeServices.length)
-                    )
-                    .map((service, index) => (
-                      <motion.div
-                        key={`${service._id}-bottom-${index}`}
-                        className="flex-shrink-0 w-[300px] sm:w-[380px]"
-                        whileHover={{ y: -5 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-teal-200 shadow-lg sm:shadow-xl shadow-teal-100 relative overflow-hidden h-full min-h-[180px] sm:min-h-[220px] flex flex-col group hover:shadow-xl sm:hover:shadow-2xl hover:border-teal-300 transition-all duration-300">
-                          <div className="relative z-10 flex flex-col items-center h-full text-center">
-                            {/* Icon Container */}
-                            <motion.div
-                              className="p-3 sm:p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg shadow-teal-100 mb-3 sm:mb-4 border border-teal-200"
-                              whileHover={{
-                                scale: 1.05,
-                                rotate: window.innerWidth >= 640 ? -5 : 0,
-                              }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              <div className="text-teal-500">
-                                {service.icon}
-                              </div>
-                            </motion.div>
-
-                            {/* Title */}
-                            <h3 className="mb-2 sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
-                              {service.title}
-                            </h3>
-
-                            {/* Accent Line */}
-                            <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full mb-3 sm:mb-4" />
-
-                            {/* Description */}
-                            <p className="flex-1 text-xs sm:text-sm font-light leading-relaxed text-gray-600">
-                              {service.description}
-                            </p>
-
-                            {/* Learn More Button */}
-                            <motion.button
-                              className="mt-3 sm:mt-4 px-3 py-1.5 sm:px-4 sm:py-2 bg-teal-50 text-teal-600 rounded-lg text-xs sm:text-sm opacity-0 group-hover:opacity-100 transition-all duration-300 border border-teal-200 hover:bg-teal-100 hover:border-teal-300"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => handleLearnMore(service)}
-                            >
-                              Learn More
-                            </motion.button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Single Marquee for Mobile */}
-            <div className="sm:hidden">
-              <div className="flex">
-                <div className="flex space-x-4 animate-marquee-left">
-                  {marqueeServices
-                    .slice(0, Math.min(6, marqueeServices.length))
-                    .map((service, index) => (
-                      <motion.div
-                        key={`${service._id}-mobile-${index}`}
-                        className="flex-shrink-0 w-[280px]"
-                      >
-                        <div className="bg-white rounded-xl p-4 border border-teal-200 shadow-lg shadow-teal-100 relative overflow-hidden h-full min-h-[160px] flex flex-col group">
-                          <div className="relative z-10 flex flex-col items-center h-full text-center">
-                            {/* Icon Container */}
-                            <div className="p-3 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-md shadow-teal-100 mb-3 border border-teal-200">
-                              <div className="text-teal-500">
-                                {service.icon}
-                              </div>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="mb-2 text-sm font-bold leading-tight tracking-tight text-gray-800">
-                              {service.title}
-                            </h3>
-
-                            {/* Accent Line */}
-                            <div className="w-12 h-0.5 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full mb-2" />
-
-                            {/* Description */}
-                            <p className="flex-1 text-xs font-light leading-relaxed text-gray-600">
-                              {service.description}
-                            </p>
-
-                            {/* Learn More Button */}
-                            <motion.button
-                              className="mt-2 px-3 py-1.5 bg-teal-50 text-teal-600 rounded-lg text-xs border border-teal-200 hover:bg-teal-100 hover:border-teal-300"
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => handleLearnMore(service)}
-                            >
-                              Learn More
-                            </motion.button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Gradient Overlays */}
-            <div className="absolute top-0 left-0 z-20 w-16 sm:w-32 h-full pointer-events-none bg-gradient-to-r from-white to-transparent" />
-            <div className="absolute top-0 right-0 z-20 w-16 sm:w-32 h-full pointer-events-none bg-gradient-to-l from-white to-transparent" />
-          </div>
-        )}
-
-        {/* Professional Video Editing Process Section - Mobile Optimized with Image on Top Cards */}
+        {/* ===== WHY WE'RE DIFFERENT SECTION ===== */}
         <motion.div
           className="mb-12 sm:mb-20"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          <div className="mb-8 sm:mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <SectionHeader
-              subtitle="Our Process"
-              title="How We Bring Your"
-              highlight="Vision to Life"
-              description="A seamless, collaborative journey from concept to final delivery"
+              subtitle="Why We're Different"
+              title="Video Editing That "
+              highlight="Actually Delivers"
+              description="While other editors make promises, we deliver results. Faster turnaround, better communication, and features that actually matter to content creators."
               center={true}
-              titleSize="xl"
-              titleWeight="normal"
-              descriptionSize="base"
+              titleSize={isMobile ? "xl" : "2xl"}
+              descriptionSize={isMobile ? "base" : "lg"}
               lineSpacing="tight"
               highlightColor="teal-500"
               dotColor="teal-500"
@@ -690,596 +1359,118 @@ const Services = () => {
             />
           </div>
 
-          {/* Process Steps - Stack on mobile with image on top, timeline on desktop */}
-          <div className="relative">
-            {/* Timeline - Desktop Only */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400/20 to-teal-600/20 transform -translate-x-1/2 hidden lg:block">
-              {[FaCut, FaVideo, FaLayerGroup, FaExpand].map((Icon, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: i * 0.3 }}
-                  viewport={{ once: true }}
-                  style={{ top: `${25 + i * 25}%` }}
-                >
-                  <div className="w-8 h-8 bg-white border-2 border-teal-300 rounded-full flex items-center justify-center shadow-lg">
-                    <Icon className="w-3 h-3 text-teal-500" />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="space-y-8 sm:space-y-16 lg:space-y-24">
-              {workflowSteps.map((step, index) => (
-                <motion.div
-                  key={index}
-                  className="relative"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  viewport={{ once: true }}
-                >
-                  {/* Mobile Layout - Stacked Card with Image on Top */}
-                  <div className="lg:hidden">
-                    <motion.div
-                      className="bg-white rounded-xl border border-teal-200 shadow-lg hover:shadow-xl transition-all duration-500 group hover:border-teal-300 overflow-hidden mb-8"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: index * 0.2 }}
-                      viewport={{ once: true }}
-                    >
-                      {/* Image Section - Top of Card */}
-                      <div className="relative">
-                        <div
-                          className={`w-full h-48 ${step.shape} overflow-hidden`}
-                        >
-                          <img
-                            src={step.image}
-                            alt={step.imageAlt}
-                            className="w-full h-full object-cover"
-                          />
-
-                          {/* Video Player Overlay */}
-                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                            <motion.button
-                              className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg"
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              <FaPlay className="w-4 h-4 text-teal-600 ml-0.5" />
-                            </motion.button>
-                          </div>
-                        </div>
-
-                        {/* Step Number Badge */}
-                        <div className="absolute top-4 left-4">
-                          <motion.div
-                            className="w-10 h-10 bg-white border-2 border-white rounded-full shadow-lg flex items-center justify-center relative"
-                            initial={{ scale: 0 }}
-                            whileInView={{ scale: 1 }}
-                            transition={{ duration: 0.6, delay: index * 0.3 }}
-                            viewport={{ once: true }}
-                          >
-                            <div
-                              className={`w-8 h-8 bg-gradient-to-r ${step.color} rounded-full flex items-center justify-center text-white font-bold text-sm relative z-10`}
-                            >
-                              {index + 1}
-                            </div>
-                          </motion.div>
-                        </div>
-
-                        {/* Duration Badge */}
-                        <div className="absolute top-4 right-4">
-                          <motion.div
-                            className="bg-black/70 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm"
-                            initial={{ opacity: 0, x: 10 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6, delay: index * 0.4 }}
-                            viewport={{ once: true }}
-                          >
-                            ⏱️ {step.duration}
-                          </motion.div>
-                        </div>
-                      </div>
-
-                      {/* Content Section - Bottom of Card */}
-                      <div className="p-5">
-                        {/* Header */}
-                        <div className="flex items-start gap-3 mb-4">
-                          <motion.div
-                            className={`p-3 rounded-xl bg-gradient-to-r ${step.color} shadow-lg flex-shrink-0`}
-                            initial={{ scale: 0 }}
-                            whileInView={{ scale: 1 }}
-                            transition={{ duration: 0.6, delay: index * 0.4 }}
-                            viewport={{ once: true }}
-                          >
-                            <div className="text-white">{step.icon}</div>
-                          </motion.div>
-                          <div className="flex-1 min-w-0">
-                            <motion.h3
-                              className="text-xl font-bold text-gray-800 mb-1 group-hover:text-teal-600 transition-colors"
-                              initial={{ opacity: 0, y: 10 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.5, delay: index * 0.5 }}
-                              viewport={{ once: true }}
-                            >
-                              {step.title}
-                            </motion.h3>
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <motion.p
-                          className="text-gray-600 text-sm mb-4 leading-relaxed"
-                          initial={{ opacity: 0 }}
-                          whileInView={{ opacity: 1 }}
-                          transition={{ duration: 0.5, delay: index * 0.6 }}
-                          viewport={{ once: true }}
-                        >
-                          {step.description}
-                        </motion.p>
-
-                        {/* Features */}
-                        <div className="grid grid-cols-2 gap-2 mb-4">
-                          {step.features.map((feature, featureIndex) => (
-                            <motion.div
-                              key={featureIndex}
-                              className="flex items-center gap-2 text-xs text-gray-700"
-                              initial={{ opacity: 0, x: -10 }}
-                              whileInView={{ opacity: 1, x: 0 }}
-                              transition={{
-                                delay: index * 0.2 + featureIndex * 0.1,
-                              }}
-                              viewport={{ once: true }}
-                            >
-                              <div
-                                className={`w-2 h-2 rounded-full bg-gradient-to-r ${step.color} flex-shrink-0`}
-                              />
-                              <span className="truncate">{feature}</span>
-                            </motion.div>
-                          ))}
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div className="mt-4">
-                          <div className="w-full bg-teal-200 rounded-full h-1.5 relative overflow-hidden">
-                            <motion.div
-                              className={`h-1.5 rounded-full bg-gradient-to-r ${step.color} relative`}
-                              initial={{ width: 0 }}
-                              whileInView={{ width: `${(index + 1) * 25}%` }}
-                              transition={{ duration: 1, delay: index * 0.3 }}
-                              viewport={{ once: true }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-teal-500 mt-1">
-                            <span>Start</span>
-                            <span>
-                              {Math.round((index + 1) * 25)}% Complete
-                            </span>
-                            <span>Finish</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Connection Line for Mobile Steps */}
-                      {index < workflowSteps.length - 1 && (
-                        <motion.div
-                          className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-0.5 h-4 bg-gradient-to-b from-teal-300 to-teal-200"
-                          initial={{ scaleY: 0 }}
-                          whileInView={{ scaleY: 1 }}
-                          transition={{ duration: 0.6, delay: index * 0.4 }}
-                          viewport={{ once: true }}
-                        />
-                      )}
-                    </motion.div>
-                  </div>
-
-                  {/* Desktop Layout - Original Side-by-Side */}
-                  <div className="hidden lg:flex flex-col lg:flex-row items-center gap-8">
-                    {/* Step Indicator */}
-                    <div className="absolute lg:left-1/2 lg:top-1/2 transform lg:-translate-x-1/2 lg:-translate-y-1/2 z-20">
-                      <motion.div
-                        className="w-16 h-16 bg-white border-4 border-white rounded-full shadow-2xl flex items-center justify-center relative"
-                        whileInView={{ scale: [0, 1.2, 1] }}
-                        transition={{ duration: 0.8, delay: index * 0.3 }}
-                        viewport={{ once: true }}
-                      >
-                        <div
-                          className={`w-12 h-12 bg-gradient-to-r ${step.color} rounded-full flex items-center justify-center text-white font-bold text-lg relative z-10`}
-                        >
-                          {index + 1}
-                        </div>
-                        <motion.div
-                          className="absolute -inset-2 border-2 border-teal-400 rounded-full"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.5, 0, 0.5],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            delay: index * 0.5,
-                          }}
-                        />
-                      </motion.div>
-                    </div>
-
-                    {/* Content Card */}
-                    <div
-                      className={`flex-1 ${
-                        index % 2 === 0 ? "lg:pr-16" : "lg:pl-16"
-                      } lg:w-1/2`}
-                    >
-                      <motion.div
-                        className="bg-white rounded-2xl p-8 border border-teal-200 shadow-xl hover:shadow-2xl transition-all duration-500 group hover:border-teal-300 relative overflow-hidden"
-                        initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: index * 0.2 }}
-                        viewport={{ once: true }}
-                      >
-                        {/* Video Timeline Background */}
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-teal-100">
-                          <motion.div
-                            className={`h-full bg-gradient-to-r ${step.color}`}
-                            initial={{ width: 0 }}
-                            whileInView={{ width: "100%" }}
-                            transition={{ duration: 1.5, delay: index * 0.3 }}
-                            viewport={{ once: true }}
-                          />
-                        </div>
-
-                        {/* Header */}
-                        <div className="flex items-start gap-4 mb-6 relative z-10">
-                          <motion.div
-                            className={`p-4 rounded-2xl bg-gradient-to-r ${step.color} shadow-lg relative overflow-hidden`}
-                            whileInView={{ scale: [0, 1], rotate: [0, 360] }}
-                            transition={{ duration: 0.8, delay: index * 0.4 }}
-                            viewport={{ once: true }}
-                            whileHover={{ scale: 1.1 }}
-                          >
-                            <div className="text-white relative z-10">
-                              {step.icon}
-                            </div>
-                          </motion.div>
-                          <div className="flex-1">
-                            <motion.h3
-                              className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-teal-600 transition-colors"
-                              initial={{ opacity: 0, y: 20 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.6, delay: index * 0.5 }}
-                              viewport={{ once: true }}
-                            >
-                              {step.title}
-                            </motion.h3>
-                            <div className="flex items-center gap-2 text-sm text-teal-500">
-                              <span>⏱️</span>
-                              <span>{step.duration}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <motion.p
-                          className="text-gray-600 mb-6 leading-relaxed relative z-10"
-                          initial={{ opacity: 0 }}
-                          whileInView={{ opacity: 1 }}
-                          transition={{ duration: 0.6, delay: index * 0.6 }}
-                          viewport={{ once: true }}
-                        >
-                          {step.description}
-                        </motion.p>
-
-                        {/* Features */}
-                        <div className="grid grid-cols-2 gap-3 relative z-10">
-                          {step.features.map((feature, featureIndex) => (
-                            <motion.div
-                              key={featureIndex}
-                              className="flex items-center gap-2 text-sm text-gray-700"
-                              initial={{ opacity: 0, x: -20 }}
-                              whileInView={{ opacity: 1, x: 0 }}
-                              transition={{
-                                delay: index * 0.2 + featureIndex * 0.1,
-                              }}
-                              viewport={{ once: true }}
-                            >
-                              <motion.div
-                                className={`w-2 h-2 rounded-full bg-gradient-to-r ${step.color}`}
-                                whileHover={{ scale: [1, 1.5, 1] }}
-                                transition={{ duration: 0.6 }}
-                              />
-                              <span>{feature}</span>
-                            </motion.div>
-                          ))}
-                        </div>
-
-                        {/* Video Progress Bar */}
-                        <div className="mt-6 relative z-10">
-                          <div className="w-full bg-teal-200 rounded-full h-2 relative overflow-hidden">
-                            <motion.div
-                              className={`h-2 rounded-full bg-gradient-to-r ${step.color} relative`}
-                              initial={{ width: 0 }}
-                              whileInView={{ width: `${(index + 1) * 25}%` }}
-                              transition={{ duration: 1, delay: index * 0.3 }}
-                              viewport={{ once: true }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-teal-500 mt-2">
-                            <span>Start</span>
-                            <span>
-                              {Math.round((index + 1) * 25)}% Complete
-                            </span>
-                            <span>Finish</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Professional Video Editing Image Section */}
-                    <div
-                      className={`flex-1 ${
-                        index % 2 === 0 ? "lg:pl-16" : "lg:pr-16"
-                      } lg:w-1/2`}
-                    >
-                      <motion.div
-                        className="relative"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8, delay: index * 0.3 }}
-                        viewport={{ once: true }}
-                      >
-                        {/* Main Image with Video Player Frame */}
-                        <motion.div
-                          className={`relative w-72 h-64 mx-auto ${step.shape} overflow-hidden border-4 border-white shadow-2xl bg-gray-900 group`}
-                          whileHover={{
-                            scale: 1.02,
-                            transition: { type: "spring", stiffness: 300 },
-                          }}
-                        >
-                          <img
-                            src={step.image}
-                            alt={step.imageAlt}
-                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
-                          />
-
-                          {/* Video Player Controls */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <motion.button
-                                  className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center hover:bg-teal-400 transition-colors"
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                >
-                                  <FaPlay className="w-3 h-3 text-white ml-0.5" />
-                                </motion.button>
-                                <div className="flex-1 mx-3">
-                                  <div className="w-full bg-teal-600 rounded-full h-1">
-                                    <motion.div
-                                      className="h-1 bg-teal-400 rounded-full"
-                                      initial={{ width: "0%" }}
-                                      whileInView={{
-                                        width: `${(index + 1) * 25}%`,
-                                      }}
-                                      transition={{
-                                        duration: 2,
-                                        delay: index * 0.4,
-                                      }}
-                                      viewport={{ once: true }}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="text-xs text-teal-300">
-                                  0:0{index + 1} / 0:04
-                                </div>
-                              </div>
-                              <motion.button
-                                className="text-teal-300 hover:text-teal-100 transition-colors"
-                                whileHover={{ scale: 1.1 }}
-                              >
-                                <FaExpand className="w-4 h-4" />
-                              </motion.button>
-                            </div>
-                          </div>
-                        </motion.div>
-
-                        {/* Video Editing Tools Animation */}
-                        <div className="absolute -top-4 -right-4">
-                          <motion.div
-                            className="w-12 h-12 bg-white rounded-lg shadow-lg border border-teal-200 flex items-center justify-center"
-                            animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
-                            transition={{
-                              duration: 3,
-                              repeat: Infinity,
-                              delay: index * 0.5,
-                            }}
-                          >
-                            <FaCut className="w-5 h-5 text-teal-500" />
-                          </motion.div>
-                        </div>
-
-                        <div className="absolute -bottom-4 -left-4">
-                          <motion.div
-                            className="w-10 h-10 bg-white rounded-lg shadow-lg border border-teal-200 flex items-center justify-center"
-                            animate={{ y: [0, 8, 0], rotate: [0, -5, 0] }}
-                            transition={{
-                              duration: 2.5,
-                              repeat: Infinity,
-                              delay: index * 0.7,
-                            }}
-                          >
-                            <FaLayerGroup className="w-4 h-4 text-teal-500" />
-                          </motion.div>
-                        </div>
-                      </motion.div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+          {/* Differentiator Cards - Responsive grid */}
+          <div
+            className={`grid grid-cols-1 ${
+              isMobile ? "gap-4" : "md:grid-cols-2 lg:grid-cols-4 gap-6"
+            } mb-12 sm:mb-16`}
+          >
+            {differentiators.map((item, index) => (
+              <AnimatedLogoCard key={index} item={item} index={index} />
+            ))}
           </div>
 
-          {/* Process Summary */}
+          {/* Comparison Section */}
           <motion.div
-            className="mt-12 sm:mt-20 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true }}
+            className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-gray-200 shadow-lg sm:shadow-xl p-4 sm:p-8 mb-12 sm:mb-16 relative overflow-hidden"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <div className="bg-gradient-to-r from-teal-50 to-teal-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-teal-200 shadow-lg relative overflow-hidden">
-              <FaVideo className="w-8 h-8 sm:w-12 sm:h-12 text-teal-500 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
-                Ready to Start Your Video Project?
-              </h3>
-              <p className="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto mb-4 sm:mb-6">
-                Join hundreds of satisfied clients who have transformed their
-                vision into stunning video content through our professional
-                editing process.
-              </p>
-              <motion.button
-                className="px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r from-teal-400 to-teal-500 text-white font-semibold rounded-full shadow-lg hover:shadow-teal-200 text-sm sm:text-base"
-                whileHover={{ scale: window.innerWidth >= 640 ? 1.05 : 1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Start Your Video Journey
-              </motion.button>
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-2 relative z-10">
+              The Real Difference
+            </h2>
+            <p className="text-gray-600 text-center mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base relative z-10 px-2">
+              See how we solve the biggest frustrations content creators face
+              with other editors
+            </p>
+
+            <div
+              className={`grid grid-cols-1 ${
+                isMobile ? "gap-4" : "md:grid-cols-2 lg:grid-cols-4 gap-6"
+              } relative z-10`}
+            >
+              {comparisonData.map((item, index) => (
+                <AnimatedComparisonCard key={index} item={item} index={index} />
+              ))}
             </div>
           </motion.div>
         </motion.div>
 
-        {/* Client Collaboration Section - Mobile Optimized */}
-        <motion.div
-          className="mb-12 sm:mb-20 bg-white rounded-xl sm:rounded-3xl border border-teal-200 p-6 sm:p-8 md:p-12 relative overflow-hidden shadow-lg"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
-                Collaborative{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-teal-500">
-                  Partnership
-                </span>
-              </h2>
-              <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-                We believe the best results come from true collaboration. That's
-                why we work closely with you throughout the entire process,
-                ensuring your vision is realized exactly as you imagined.
-              </p>
+        {/* Video Reviews Section */}
+        <VideoReviewSection />
 
-              <div className="space-y-3 sm:space-y-4">
-                {[
-                  "Regular progress updates and reviews",
-                  "Direct communication with your dedicated editor",
-                  "Flexible revision process",
-                  "Multiple delivery formats for any platform",
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start">
-                    <div className="bg-teal-100 p-1.5 sm:p-2 rounded-lg mr-3 flex-shrink-0">
-                      <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-teal-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                    </div>
-                    <span className="text-gray-600 text-sm sm:text-base">
-                      {item}
-                    </span>
-                  </div>
-                ))}
+        {/* Statistics Section */}
+        {!statsLoading && (
+          <motion.div
+            className={`grid grid-cols-1 ${
+              isMobile ? "gap-4" : "md:grid-cols-3 gap-8"
+            } mb-12 sm:mb-20`}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
+            {/* Stat 1 - Videos Delivered */}
+            <motion.div
+              className="text-center p-6 sm:p-8 bg-white rounded-xl sm:rounded-2xl border border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+              whileHover={{
+                y: isMobile ? -2 : -5,
+                borderColor: "rgba(20, 184, 166, 0.3)",
+                transition: { duration: 0.3 },
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="text-4xl sm:text-5xl font-bold text-teal-600 mb-2">
+                  {getVideosValue()}
+                </div>
+                <div className="text-gray-600 font-light tracking-wide text-sm sm:text-base">
+                  Videos Delivered
+                </div>
               </div>
             </motion.div>
 
+            {/* Stat 2 - Trusted Brands */}
             <motion.div
-              className="relative"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              className="text-center p-6 sm:p-8 bg-white rounded-xl sm:rounded-2xl border border-emerald-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+              whileHover={{
+                y: isMobile ? -2 : -5,
+                borderColor: "rgba(16, 185, 129, 0.3)",
+                transition: { duration: 0.3 },
+              }}
             >
-              {/* Collaboration visual */}
-              <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden p-4 sm:p-6 border border-teal-200 shadow-lg">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
-                      C
-                    </div>
-                    <div className="ml-2 sm:ml-3">
-                      <div className="text-gray-800 font-medium text-sm sm:text-base">
-                        Client
-                      </div>
-                      <div className="text-teal-500 text-xs sm:text-sm">
-                        You
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-teal-500 animate-pulse">
-                    <svg
-                      className="w-5 h-5 sm:w-6 sm:h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-teal-500 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base">
-                      E
-                    </div>
-                    <div className="ml-2 sm:ml-3">
-                      <div className="text-gray-800 font-medium text-sm sm:text-base">
-                        Editor
-                      </div>
-                      <div className="text-teal-600 text-xs sm:text-sm">
-                        Our Team
-                      </div>
-                    </div>
-                  </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="text-4xl sm:text-5xl font-bold text-emerald-600 mb-2">
+                  {getBrandsValue()}
                 </div>
-
-                <div className="bg-teal-50 rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 border border-teal-200">
-                  <div className="text-teal-500 text-xs sm:text-sm mb-1">
-                    Client Feedback
-                  </div>
-                  <div className="text-gray-800 text-sm sm:text-base">
-                    "Can we make the intro more dynamic?"
-                  </div>
-                </div>
-
-                <div className="bg-teal-50 rounded-lg p-3 sm:p-4 border border-teal-200">
-                  <div className="text-teal-600 text-xs sm:text-sm mb-1">
-                    Editor Response
-                  </div>
-                  <div className="text-gray-800 text-sm sm:text-base">
-                    "Sure! I'll add some motion graphics to enhance it."
-                  </div>
+                <div className="text-gray-600 font-light tracking-wide text-sm sm:text-base">
+                  Trusted Brands
                 </div>
               </div>
             </motion.div>
-          </div>
-        </motion.div>
+
+            {/* Stat 3 - Years Experience */}
+            <motion.div
+              className="text-center p-6 sm:p-8 bg-white rounded-xl sm:rounded-2xl border border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+              whileHover={{
+                y: isMobile ? -2 : -5,
+                borderColor: "rgba(34, 197, 94, 0.3)",
+                transition: { duration: 0.3 },
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="text-4xl sm:text-5xl font-bold text-green-600 mb-2">
+                  {getYearsValue()}
+                </div>
+                <div className="text-gray-600 font-light tracking-wide text-sm sm:text-base">
+                  Years Experience
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* CTA Section - Mobile Optimized */}
         <motion.div

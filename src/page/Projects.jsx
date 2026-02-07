@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiPlay,
@@ -6,8 +6,8 @@ import {
   FiGrid,
   FiBox,
   FiFilm,
-  FiClock,
-  FiCalendar,
+  FiTool,
+  FiEdit,
 } from "react-icons/fi";
 import {
   getVideoReels,
@@ -15,19 +15,107 @@ import {
   getVideoReelsByCategory,
 } from "../services/api";
 import bg from "/ICON.png";
-import SectionHeader from "../components/Shared/SectionHeader";
 
-// Import app icons
+// Import app icons - mapping for tags
 import davinchi from "../assets/davenchi.png";
 import premier from "../assets/premier.png";
 import cap_cut from "../assets/cap-cut.png";
 import after_effect from "../assets/after-effect.png";
 import final_cut from "../assets/final-cut.png";
 
-// Background Logo Only Animation (Original)
-const BackgroundLogoAnimation = () => {
+// Enhanced Background Animation with smoother logo animation
+const FluidBackground = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    let animationId;
+
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Create fluid gradient animation
+    const particles = Array.from({ length: 15 }).map(() => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 80 + 20,
+      speed: Math.random() * 0.2 + 0.1,
+      offset: Math.random() * Math.PI * 2,
+    }));
+
+    let time = 0;
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Base gradient
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2,
+        canvas.height / 2,
+        0,
+        canvas.width / 2,
+        canvas.height / 2,
+        Math.max(canvas.width, canvas.height) / 1.5
+      );
+
+      gradient.addColorStop(0, "rgba(13, 148, 136, 0.05)");
+      gradient.addColorStop(0.3, "rgba(13, 148, 136, 0.02)");
+      gradient.addColorStop(1, "transparent");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Animated particles
+      particles.forEach((particle) => {
+        const x =
+          particle.x + Math.cos(time * particle.speed + particle.offset) * 30;
+        const y =
+          particle.y + Math.sin(time * particle.speed + particle.offset) * 20;
+
+        const particleGradient = ctx.createRadialGradient(
+          x,
+          y,
+          0,
+          x,
+          y,
+          particle.size
+        );
+
+        particleGradient.addColorStop(0, `rgba(13, 148, 136, ${0.03})`);
+        particleGradient.addColorStop(1, "transparent");
+
+        ctx.fillStyle = particleGradient;
+        ctx.beginPath();
+        ctx.arc(x, y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      time += 0.005;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+
+      {/* Smoother Logo Animation - Like in HeroSection */}
       {/* Main Background Logo */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center z-0"
@@ -46,12 +134,12 @@ const BackgroundLogoAnimation = () => {
         <img
           src={bg}
           alt="Background Logo"
-          className="w-[85%] max-w-[1100px] h-auto"
+          className="w-[80%] max-w-[1000px] h-auto"
           style={{
             filter: `
               brightness(1.2)
               contrast(1.1)
-              drop-shadow(0 0 150px rgba(13, 148, 136, 0.15))
+              drop-shadow(0 0 120px rgba(13, 148, 136, 0.15))
             `,
           }}
         />
@@ -75,28 +163,29 @@ const BackgroundLogoAnimation = () => {
         <img
           src={bg}
           alt="Background Logo Glow"
-          className="w-[90%] max-w-[1300px] h-auto opacity-60"
+          className="w-[85%] max-w-[1200px] h-auto opacity-60"
           style={{
-            filter: "blur(40px) brightness(1.3)",
+            filter: "blur(35px) brightness(1.3)",
             mixBlendMode: "soft-light",
           }}
         />
       </motion.div>
 
       {/* Subtle Floating Particles */}
-      {Array.from({ length: 12 }).map((_, i) => (
+      {Array.from({ length: 10 }).map((_, i) => (
         <motion.div
           key={`particle-${i}`}
-          className="absolute w-1.5 h-1.5 bg-gradient-to-r from-teal-400/50 to-teal-300/30 rounded-full z-5"
+          className="absolute w-1 h-1 bg-gradient-to-r from-teal-400/50 to-teal-300/30 rounded-full z-5"
           style={{
             left: `${8 + i * 8}%`,
             top: `${12 + i * 8}%`,
           }}
           animate={{
-            y: [0, -20, 0, -12, 0],
-            x: [0, 6, -4, 5, 0],
-            scale: [1, 1.3, 0.8, 1.2, 1],
+            y: [0, -15, 0, -10, 0],
+            x: [0, 4, -3, 4, 0],
+            scale: [1, 1.2, 0.8, 1.1, 1],
             opacity: [0.2, 0.4, 0.2, 0.35, 0.2],
+            rotate: [0, 45, 90, 135, 180],
           }}
           transition={{
             duration: 8 + i * 1.5,
@@ -120,14 +209,14 @@ const BackgroundLogoAnimation = () => {
           ease: [0.4, 0, 0.2, 1],
         }}
       >
-        <div className="w-[800px] h-[800px] bg-teal-400/12 rounded-full blur-3xl" />
+        <div className="w-[600px] h-[600px] bg-teal-400/12 rounded-full blur-2xl" />
       </motion.div>
     </div>
   );
 };
 
-// Floating App Logos Component
-const FloatingAppLogos = ({ videoTools }) => {
+// Enhanced FloatingTools with random positions and smoother animations
+const FloatingTools = ({ videoTools }) => {
   // Generate random positions for floating logos
   const getRandomPosition = (index) => {
     const positions = [
@@ -291,24 +380,49 @@ const FloatingAppLogos = ({ videoTools }) => {
   );
 };
 
-// Glass Morphism Video Card (New Design)
-const GlassVideoCard = ({
-  project,
-  isHovered,
-  onHoverStart,
-  onHoverEnd,
-  onClick,
-  showPlayButton,
-}) => {
+// Enhanced Video Card with app tags instead of year and duration
+const EnhancedVideoCard = React.memo(({ project, onClick, isActive }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef(null);
+
+  // Map tags to display app names
+  const getAppNameFromTag = (tag) => {
+    if (!tag || typeof tag !== "string") return tag || "Unknown App";
+    const tagLower = tag.toLowerCase();
+    if (tagLower.includes("davinci") || tagLower.includes("resolve"))
+      return "DaVinci Resolve";
+    if (tagLower.includes("premier") || tagLower.includes("pro"))
+      return "Premier Pro";
+    if (tagLower.includes("final") || tagLower.includes("cut"))
+      return "Final Cut Pro";
+    if (tagLower.includes("capcut")) return "CapCut";
+    if (tagLower.includes("after") || tagLower.includes("effects"))
+      return "After Effects";
+    // Capitalize first letter of each word for better display
+    return tag
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  // Get unique app names from tags - show all tags, not just first few
+  const appNames = React.useMemo(() => {
+    if (!project.technologies || !Array.isArray(project.technologies))
+      return [];
+    const names = project.technologies.map((tag) => getAppNameFromTag(tag));
+    return [...new Set(names)]; // Remove duplicates
+  }, [project.technologies]);
+
+  // Show first 3 apps, rest in +X more
+  const MAX_VISIBLE_APPS = 2;
+  const visibleApps = appNames.slice(0, MAX_VISIBLE_APPS);
+  const hiddenAppsCount = Math.max(0, appNames.length - MAX_VISIBLE_APPS);
 
   useEffect(() => {
     if (videoRef.current) {
       if (isHovered) {
         videoRef.current.currentTime = 0;
-        videoRef.current
-          .play()
-          .catch((e) => console.log("Autoplay prevented:", e));
+        videoRef.current.play().catch(() => {});
       } else {
         videoRef.current.pause();
       }
@@ -316,146 +430,208 @@ const GlassVideoCard = ({
   }, [isHovered]);
 
   return (
-    <motion.div
-      className="group relative rounded-3xl overflow-hidden cursor-pointer"
-      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+    <motion.article
+      className="group relative cursor-pointer"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
       whileHover={{
         y: -8,
-        transition: { duration: 0.3, ease: "easeOut" },
+        transition: { duration: 0.4, ease: "easeOut" },
       }}
-      transition={{
-        duration: 0.6,
-        ease: [0.25, 0.1, 0.25, 1],
-      }}
-      onHoverStart={onHoverStart}
-      onHoverEnd={onHoverEnd}
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Glass Background */}
-      <div className="absolute inset-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl" />
+      {/* Glow effect */}
+      <motion.div
+        className="absolute inset-0 rounded-3xl bg-gradient-to-r from-teal-400/10 to-teal-600/10 blur-xl"
+        animate={{
+          opacity: isHovered ? 0.6 : 0,
+          scale: isHovered ? 1.05 : 1,
+        }}
+        transition={{ duration: 0.3 }}
+      />
 
-      {/* Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-400/10 to-emerald-400/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-      {/* Content Container */}
-      <div className="relative z-10 p-6">
-        {/* Video Container */}
-        <div className="relative rounded-2xl overflow-hidden mb-4 aspect-video bg-gradient-to-br from-gray-900 to-gray-800">
+      {/* Card container */}
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-white/95 to-white/90 backdrop-blur-sm border border-white/50 shadow-lg">
+        {/* Video container */}
+        <div className="relative aspect-video overflow-hidden">
           {/* Thumbnail */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-500"
             style={{
               backgroundImage: `url(${project.thumbnail})`,
               opacity: isHovered ? 0 : 1,
-              transition: "opacity 0.4s ease",
             }}
           />
 
           {/* Video */}
           <video
             ref={videoRef}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+            style={{ opacity: isHovered ? 1 : 0 }}
             muted
             loop
             playsInline
             preload="metadata"
             poster={project.thumbnail}
-            style={{
-              opacity: isHovered ? 1 : 0,
-              transition: "opacity 0.4s ease",
-            }}
           >
             <source src={project.videoUrl} type="video/mp4" />
           </video>
 
-          {/* Play Button */}
-          <AnimatePresence>
-            {showPlayButton && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-              >
-                <motion.div
-                  className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center shadow-2xl shadow-teal-500/30"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <FiPlay className="w-6 h-6 text-white ml-1" />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
-          {/* Category Badge */}
-          <div className="absolute top-3 left-3">
-            <span className="px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/20">
+          {/* Play button */}
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            animate={{
+              scale: isHovered ? 0 : 1,
+              opacity: isHovered ? 0 : 1,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-full flex items-center justify-center shadow-lg">
+              <FiPlay className="w-6 h-6 text-white ml-1" />
+            </div>
+          </motion.div>
+
+          {/* Category badge */}
+          <div className="absolute top-4 left-4">
+            <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-teal-700">
               {project.category}
             </span>
           </div>
         </div>
 
         {/* Content */}
-        <div className="space-y-3">
-          {/* Title */}
-          <h3 className="text-lg font-bold text-gray-800 line-clamp-2 leading-tight">
+        <div className="p-6">
+          <motion.h3
+            className="text-lg font-semibold text-gray-800 mb-4 line-clamp-2"
+            animate={{ color: isHovered ? "#0d9488" : "#1f2937" }}
+            transition={{ duration: 0.3 }}
+          >
             {project.title}
-          </h3>
+          </motion.h3>
 
-          {/* Meta Information */}
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1.5">
-              <FiCalendar className="w-4 h-4" />
-              <span>{project.year}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <FiClock className="w-4 h-4" />
-              <span>{project.duration}</span>
-            </div>
-          </div>
-
-          {/* Technologies */}
-          {project.technologies && project.technologies.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {project.technologies.slice(0, 3).map((tech, index) => (
-                <motion.span
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="px-3 py-1.5 bg-gradient-to-r from-teal-500/10 to-emerald-500/10 text-teal-700 text-xs font-medium rounded-full border border-teal-200/50 backdrop-blur-sm"
-                >
-                  {tech}
-                </motion.span>
-              ))}
+          {/* App/Tools Used Section - Show all apps or at least 2 */}
+          {appNames.length > 0 && (
+            <div className="mb-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <FiTool className="w-3.5 h-3.5 text-teal-600" />
+                <span className="text-xs font-medium text-gray-600">
+                  Tools Used:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {visibleApps.map((appName, index) => (
+                  <motion.span
+                    key={index}
+                    className="px-2.5 py-1 bg-teal-50 border border-teal-200 rounded-lg text-xs font-medium text-teal-700 flex items-center gap-1"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{
+                      scale: 1.05,
+                      backgroundColor: "rgba(13, 148, 136, 0.1)",
+                    }}
+                  >
+                    <FiEdit className="w-3 h-3" />
+                    {appName}
+                  </motion.span>
+                ))}
+                {hiddenAppsCount > 0 && (
+                  <span className="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg text-xs font-medium text-gray-600">
+                    +{hiddenAppsCount} more
+                  </span>
+                )}
+              </div>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Hover Border Effect */}
-      <div className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-teal-400/0 via-teal-400/20 to-emerald-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Description */}
+          {project.description && (
+            <p className="text-sm text-gray-600 line-clamp-2 mt-2">
+              {project.description}
+            </p>
+          )}
+        </div>
+
+        {/* Hover line effect */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-teal-600"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: isHovered ? 1 : 0 }}
+          transition={{ duration: 0.4 }}
+        />
+      </div>
+    </motion.article>
+  );
+});
+
+// Enhanced Category Filter
+const CategoryFilter = ({ categories, activeCategory, onChange, loading }) => {
+  return (
+    <motion.div
+      className="flex flex-wrap justify-center gap-3 mb-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      {categories.map((category) => (
+        <motion.button
+          key={category.id}
+          onClick={() => onChange(category.id)}
+          disabled={loading}
+          className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+            activeCategory === category.id
+              ? "text-white"
+              : "text-gray-700 hover:text-teal-600"
+          } ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+          whileHover={loading ? {} : { scale: 1.05 }}
+          whileTap={loading ? {} : { scale: 0.95 }}
+        >
+          {activeCategory === category.id && (
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-500 to-teal-600"
+              layoutId="activeCategory"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+          )}
+          <span className="relative z-10 flex items-center gap-2">
+            {loading && activeCategory === category.id ? (
+              <motion.div
+                className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+            ) : (
+              category.icon
+            )}
+            {category.name}
+          </span>
+        </motion.button>
+      ))}
     </motion.div>
   );
 };
 
+// Main Projects Component
 const Projects = () => {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [hoveredProject, setHoveredProject] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeLayout, setActiveLayout] = useState("grid");
   const [projects, setProjects] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState({
+    initial: true,
+    category: false,
+  });
   const [error, setError] = useState(null);
 
   const modalVideoRef = useRef(null);
-  const containerRef = useRef(null);
 
-  // Video editing tools data
+  // Video tools data - map to imported logos
   const videoTools = [
     { name: "DaVinci Resolve", logo: davinchi },
     { name: "Premier Pro", logo: premier },
@@ -464,15 +640,18 @@ const Projects = () => {
     { name: "After Effects", logo: after_effect },
   ];
 
-  // Fetch projects and categories on component mount
+  // Fetch initial data (categories and all projects)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        setLoading(true);
-        const categoriesResponse = await getVisibleCategories();
-        const categoriesData = categoriesResponse.data?.categories || [];
+        setLoading((prev) => ({ ...prev, initial: true }));
+        const [categoriesResponse, projectsResponse] = await Promise.all([
+          getVisibleCategories(),
+          getVideoReels(), // Load all projects initially
+        ]);
 
-        // Filter out introduction category and format categories
+        // Process categories
+        const categoriesData = categoriesResponse.data?.categories || [];
         const filteredCategories = categoriesData.filter(
           (cat) =>
             cat.slug !== "introduction" &&
@@ -483,632 +662,369 @@ const Projects = () => {
           {
             id: "all",
             name: "All Projects",
-            icon: <FiFilm className="inline mr-2" />,
+            icon: <FiFilm className="w-4 h-4" />,
           },
           ...filteredCategories.map((cat) => ({
             id: cat.slug || cat.name.toLowerCase(),
             name: cat.name,
-            icon: <FiFilm className="inline mr-2" />,
+            icon: <FiFilm className="w-4 h-4" />,
           })),
         ];
 
         setCategories(formattedCategories);
 
-        // Fetch all video reels and exclude introduction category
-        const projectsResponse = await getVideoReels();
-        let projectsData = projectsResponse.data?.videoReels || [];
+        // Process projects for "all" category
+        processProjectsResponse(projectsResponse);
 
-        // Filter out introduction category videos
-        projectsData = projectsData.filter(
-          (project) =>
-            project.category !== "introduction" &&
-            !project.category?.toLowerCase().includes("introduction")
-        );
-
-        const formattedProjects = projectsData.map((project) => ({
-          id: project._id,
-          title: project.title,
-          category: project.category,
-          description: project.description,
-          videoUrl: project.videoUrl,
-          thumbnail: project.thumbnailUrl,
-          technologies: project.tags || [],
-          year: new Date(project.createdAt).getFullYear().toString(),
-          duration: "0:00",
-          color: getColorByCategory(project.category),
-          isBest: project.isBest,
-          createdAt: project.createdAt,
-        }));
-
-        setProjects(formattedProjects);
         setError(null);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching initial data:", err);
         setError("Failed to load projects. Please try again later.");
-        setCategories(getFallbackCategories());
-        setProjects(getFallbackProjects());
       } finally {
-        setLoading(false);
+        setLoading((prev) => ({ ...prev, initial: false }));
       }
     };
 
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  // Fetch projects by category when activeCategory changes
+  // Fetch projects when category changes
   useEffect(() => {
     const fetchProjectsByCategory = async () => {
-      if (activeCategory === "all") {
-        try {
-          setLoading(true);
-          const response = await getVideoReels();
-          let projectsData = response.data?.videoReels || [];
-
-          projectsData = projectsData.filter(
-            (project) =>
-              project.category !== "introduction" &&
-              !project.category?.toLowerCase().includes("introduction")
-          );
-
-          const formattedProjects = projectsData.map((project) => ({
-            id: project._id,
-            title: project.title,
-            category: project.category,
-            description: project.description,
-            videoUrl: project.videoUrl,
-            thumbnail: project.thumbnailUrl,
-            technologies: project.tags || [],
-            year: new Date(project.createdAt).getFullYear().toString(),
-            duration: "0:00",
-            color: getColorByCategory(project.category),
-            isBest: project.isBest,
-            createdAt: project.createdAt,
-          }));
-
-          setProjects(formattedProjects);
-        } catch (err) {
-          console.error("Error fetching all projects:", err);
-        } finally {
-          setLoading(false);
-        }
-        return;
-      }
-
       try {
-        setLoading(true);
-        const response = await getVideoReelsByCategory(activeCategory);
-        let projectsData = response.data?.videoReels || [];
+        setLoading((prev) => ({ ...prev, category: true }));
 
-        projectsData = projectsData.filter(
-          (project) =>
-            project.category !== "introduction" &&
-            !project.category?.toLowerCase().includes("introduction")
-        );
+        let response;
 
-        const formattedProjects = projectsData.map((project) => ({
-          id: project._id,
-          title: project.title,
-          category: project.category,
-          description: project.description,
-          videoUrl: project.videoUrl,
-          thumbnail: project.thumbnailUrl,
-          technologies: project.tags || [],
-          year: new Date(project.createdAt).getFullYear().toString(),
-          duration: "0:00",
-          color: getColorByCategory(project.category),
-          isBest: project.isBest,
-          createdAt: project.createdAt,
-        }));
+        if (activeCategory === "all") {
+          // Use getVideoReels for "all" category
+          response = await getVideoReels();
+        } else {
+          // Use getVideoReelsByCategory for specific categories
+          response = await getVideoReelsByCategory(activeCategory);
+        }
 
-        setProjects(formattedProjects);
+        processProjectsResponse(response);
+        setError(null);
       } catch (err) {
-        console.error("Error fetching projects by category:", err);
-        const filteredFromExisting = projects.filter(
-          (project) => project.category === activeCategory
+        console.error(
+          `Error fetching projects for category ${activeCategory}:`,
+          err
         );
-        setProjects(filteredFromExisting);
+        setError(
+          `Failed to load ${
+            activeCategory === "all" ? "all" : activeCategory
+          } projects. Please try again.`
+        );
       } finally {
-        setLoading(false);
+        setLoading((prev) => ({ ...prev, category: false }));
       }
     };
 
     fetchProjectsByCategory();
-  }, [activeCategory]);
+  }, [activeCategory]); // Only re-run when activeCategory changes
 
-  // Helper functions
-  const getColorByCategory = (category) => {
-    const colorMap = {
-      wedding: "#0d9488",
-      commercial: "#0d9488",
-      music: "#0d9488",
-      documentary: "#0d9488",
-      travel: "#0d9488",
-      reel: "#0d9488",
-    };
-    return colorMap[category] || "#0d9488";
+  // Helper function to process projects response
+  const processProjectsResponse = (response) => {
+    let projectsData = response.data?.videoReels || [];
+
+    // Filter out introduction projects
+    projectsData = projectsData.filter(
+      (project) =>
+        project.category !== "introduction" &&
+        !project.category?.toLowerCase().includes("introduction")
+    );
+
+    const formattedProjects = projectsData.map((project) => ({
+      id: project._id,
+      title: project.title,
+      category: project.category,
+      description: project.description,
+      videoUrl: project.videoUrl,
+      thumbnail: project.thumbnailUrl,
+      technologies: project.tags || [], // Use tags as app names
+      isBest: project.isBest,
+    }));
+
+    setProjects(formattedProjects);
   };
 
-  const getFallbackCategories = () => [
-    {
-      id: "all",
-      name: "All Projects",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-    {
-      id: "wedding",
-      name: "Wedding Films",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-    {
-      id: "commercial",
-      name: "Commercial",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-    {
-      id: "music",
-      name: "Music Videos",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-    {
-      id: "documentary",
-      name: "Documentary",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-    {
-      id: "travel",
-      name: "Travel Vlogs",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-    {
-      id: "reel",
-      name: "Reels",
-      icon: <FiFilm className="inline mr-2" />,
-    },
-  ];
+  // Handle category change
+  const handleCategoryChange = async (categoryId) => {
+    if (categoryId === activeCategory) return;
 
-  const getFallbackProjects = () => [
-    {
-      id: 1,
-      title: "Cinematic Wedding Film",
-      category: "wedding",
-      description:
-        "A beautifully crafted wedding film with cinematic color grading and emotional storytelling",
-      videoUrl: "https://assets.codepen.io/3364143/sample.mp4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-      technologies: ["Premiere Pro", "After Effects", "Color Grading"],
-      year: "2023",
-      duration: "3:45",
-      color: "#0d9488",
-    },
-    {
-      id: 2,
-      title: "Commercial Advertisement",
-      category: "commercial",
-      description: "Professional commercial video with stunning visual effects",
-      videoUrl: "https://assets.codepen.io/3364143/sample.mp4",
-      thumbnail:
-        "https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80",
-      technologies: ["After Effects", "Cinema 4D", "Color Grading"],
-      year: "2023",
-      duration: "2:30",
-      color: "#0d9488",
-    },
-  ];
-
-  const filteredProjects =
-    activeCategory === "all"
-      ? projects
-      : projects.filter((project) => project.category === activeCategory);
-
-  // Handle project interactions
-  const handleProjectHover = (projectId) => {
-    setHoveredProject(projectId);
+    setActiveCategory(categoryId);
+    setSelectedProject(null); // Reset selected project on category change
   };
 
-  const handleProjectLeave = () => {
-    setHoveredProject(null);
-  };
-
-  const handleProjectSelect = (project) => {
-    setSelectedProject(project);
-  };
-
-  const closeModal = () => {
+  // Handle modal
+  const closeModal = useCallback(() => {
     if (modalVideoRef.current) {
       modalVideoRef.current.pause();
     }
     setSelectedProject(null);
-  };
-
-  // Background grid animation
-  useEffect(() => {
-    const canvas = containerRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    let animationFrameId;
-
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    const drawGrid = (time) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.strokeStyle = "rgba(13, 148, 136, 0.1)";
-      ctx.lineWidth = 1;
-
-      const cellSize = 50;
-      const offsetX = (time * 0.01) % cellSize;
-      const offsetY = (time * 0.01) % cellSize;
-
-      for (let x = offsetX; x < canvas.width; x += cellSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = offsetY; y < canvas.height; y += cellSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      const gradient = ctx.createRadialGradient(
-        canvas.width / 2,
-        canvas.height / 2,
-        0,
-        canvas.width / 2,
-        canvas.height / 2,
-        Math.max(canvas.width, canvas.height) * 0.8
-      );
-
-      const pulseIntensity = (Math.sin(time * 0.002) + 1) * 0.2;
-      gradient.addColorStop(
-        0,
-        `rgba(13, 148, 136, ${0.03 + pulseIntensity * 0.03})`
-      );
-      gradient.addColorStop(
-        0.5,
-        `rgba(13, 148, 136, ${0.05 + pulseIntensity * 0.03})`
-      );
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0.6)");
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      animationFrameId = requestAnimationFrame(drawGrid);
-    };
-
-    animationFrameId = requestAnimationFrame(drawGrid);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("resize", resizeCanvas);
-    };
   }, []);
 
-  // Close modal on escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.keyCode === 27) closeModal();
+      if (e.key === "Escape") closeModal();
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, []);
-
-  const formatCategoryName = (categoryId) => {
-    const category = categories.find((c) => c.id === categoryId);
-    return category
-      ? category.name
-      : categoryId
-          .split(/(?=[A-Z])/)
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-  };
+  }, [closeModal]);
 
   // Loading state
-  if (loading && projects.length === 0) {
+  if (loading.initial && projects.length === 0) {
     return (
-      <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/80 py-20 px-4 flex items-center justify-center">
+      <section className="relative min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-teal-50/50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
-          <p className="text-gray-700">Loading projects...</p>
-        </div>
-      </section>
-    );
-  }
-
-  // Error state
-  if (error && projects.length === 0) {
-    return (
-      <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/80 py-20 px-4 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  // Render projects based on active layout
-  const renderProjects = () => {
-    if (filteredProjects.length === 0) {
-      return (
-        <div className="text-center py-20">
-          <p className="text-gray-600 text-lg">
-            No projects found for this category.
-          </p>
-        </div>
-      );
-    }
-
-    if (activeLayout === "stack") {
-      return (
-        <motion.div
-          className="projects-stack flex flex-col gap-8 max-w-4xl mx-auto"
-          initial="hidden"
-          animate="visible"
-        >
-          {filteredProjects.map((project, i) => (
-            <GlassVideoCard
-              key={project.id}
-              project={project}
-              isHovered={hoveredProject === project.id}
-              onHoverStart={() => handleProjectHover(project.id)}
-              onHoverEnd={handleProjectLeave}
-              onClick={() => handleProjectSelect(project)}
-              showPlayButton={hoveredProject !== project.id}
-            />
-          ))}
-        </motion.div>
-      );
-    }
-
-    // Default grid layout
-    return (
-      <motion.div
-        className="projects-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        initial="hidden"
-        animate="visible"
-      >
-        {filteredProjects.map((project) => (
-          <GlassVideoCard
-            key={project.id}
-            project={project}
-            isHovered={hoveredProject === project.id}
-            onHoverStart={() => handleProjectHover(project.id)}
-            onHoverEnd={handleProjectLeave}
-            onClick={() => handleProjectSelect(project)}
-            showPlayButton={hoveredProject !== project.id}
+          <motion.div
+            className="w-16 h-16 border-4 border-teal-500/30 border-t-teal-500 rounded-full mx-auto mb-6"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-        ))}
-      </motion.div>
+          <motion.p
+            className="text-gray-700"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            Loading creative projects...
+          </motion.p>
+        </div>
+      </section>
     );
-  };
+  }
 
   return (
     <section
       id="projects"
-      className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/80 py-20 px-4"
+      className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/50 py-16 px-4 md:px-8"
     >
-      {/* Background Logo Animation (Original) */}
-      <BackgroundLogoAnimation />
+      {/* Background Effects */}
+      <FluidBackground />
+      <FloatingTools videoTools={videoTools} />
 
-      {/* Floating App Logos */}
-      <FloatingAppLogos videoTools={videoTools} />
-
-      <canvas ref={containerRef} className="absolute inset-0 w-full h-full" />
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-900/5 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-teal-900/5 to-teal-900/5"></div>
+      {/* Decorative elements */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-400/20 to-transparent" />
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Original Section Header */}
-        <SectionHeader
-          subtitle="Portfolio Showcase"
-          title="Our"
-          highlight="Visual Projects"
-          description="Explore our collection of video editing projects that showcase our expertise in storytelling, color grading, and visual effects."
-          center={true}
-          titleSize="2xl"
-          titleWeight="normal"
-          descriptionSize="lg"
-          lineSpacing="tight"
-          highlightColor="teal-500"
-          dotColor="teal-500"
-          highlightOnNewLine={false}
-        />
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-teal-50 to-teal-100/50 border border-teal-200 mb-4">
+            <FiFilm className="w-4 h-4 text-teal-600" />
+            <span className="text-sm font-medium text-teal-700">
+              Portfolio Showcase
+            </span>
+          </div>
 
-        {/* Layout switcher (Original) */}
-        <div className="flex justify-center items-center gap-2 mb-8">
+          <h1 className="text-4xl md:text-5xl font-light text-gray-800 mb-4">
+            Our{" "}
+            <span className="font-semibold text-teal-600">Visual Projects</span>
+          </h1>
+
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Discover our collection of video editing projects showcasing
+            expertise in storytelling, color grading, and visual effects.
+          </p>
+        </motion.div>
+
+        {/* Layout Switcher */}
+        <motion.div
+          className="flex justify-center gap-2 mb-8"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <button
             onClick={() => setActiveLayout("grid")}
-            className={`p-2 rounded-lg transition-all duration-300 ${
+            className={`p-3 rounded-xl transition-all duration-300 flex items-center gap-2 ${
               activeLayout === "grid"
-                ? "bg-teal-500/10 text-teal-600 shadow-lg shadow-teal-500/20"
-                : "bg-white/50 text-gray-600 hover:bg-gray-100/60 border border-gray-200"
+                ? "bg-teal-500 text-white shadow-lg shadow-teal-500/30"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
             }`}
           >
             <FiGrid className="w-5 h-5" />
+            <span className="text-sm font-medium">Grid</span>
           </button>
           <button
             onClick={() => setActiveLayout("stack")}
-            className={`p-2 rounded-lg transition-all duration-300 ${
+            className={`p-3 rounded-xl transition-all duration-300 flex items-center gap-2 ${
               activeLayout === "stack"
-                ? "bg-teal-500/10 text-teal-600 shadow-lg shadow-teal-500/20"
-                : "bg-white/50 text-gray-600 hover:bg-gray-100/60 border border-gray-200"
+                ? "bg-teal-500 text-white shadow-lg shadow-teal-500/30"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
             }`}
           >
             <FiBox className="w-5 h-5" />
+            <span className="text-sm font-medium">Stack</span>
           </button>
-        </div>
-
-        {/* Category Filters (Original) */}
-        <motion.div
-          className="flex flex-wrap justify-center gap-3 mb-12"
-          initial="hidden"
-          animate="visible"
-        >
-          {categories.map((category) => (
-            <motion.button
-              key={category.id}
-              className={`px-5 py-3 rounded-xl flex items-center transition-all duration-300 ${
-                activeCategory === category.id
-                  ? "bg-gradient-to-r from-teal-500/90 to-teal-600/90 text-white shadow-lg shadow-teal-500/30 border border-teal-400/30"
-                  : "bg-white/50 text-gray-700 hover:bg-gray-100/60 backdrop-blur-sm border border-gray-300 hover:border-teal-500/30 hover:shadow-md hover:shadow-teal-500/10"
-              }`}
-              onClick={() => setActiveCategory(category.id)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="mr-2 text-sm">{category.icon}</span>
-              <span className="font-medium">{category.name}</span>
-            </motion.button>
-          ))}
         </motion.div>
 
-        {/* Loading indicator for category changes */}
-        {loading && projects.length > 0 && (
-          <div className="text-center mb-6">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500 mx-auto"></div>
-            <p className="text-gray-600 text-sm mt-2">
-              Loading{" "}
-              {activeCategory === "all"
-                ? "all projects"
-                : `${activeCategory} projects`}
-              ...
-            </p>
-          </div>
+        {/* Category Filter */}
+        <CategoryFilter
+          categories={categories}
+          activeCategory={activeCategory}
+          onChange={handleCategoryChange}
+          loading={loading.category}
+        />
+
+        {/* Loading indicator for category change */}
+        {loading.category && (
+          <motion.div
+            className="text-center py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="inline-flex items-center gap-2 text-teal-600">
+              <motion.div
+                className="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              <span>
+                Loading {activeCategory === "all" ? "all" : activeCategory}{" "}
+                projects...
+              </span>
+            </div>
+          </motion.div>
         )}
 
-        {/* Projects Grid with New Glass Cards */}
-        {renderProjects()}
+        {/* Projects Grid */}
+        {error ? (
+          <div className="text-center py-20">
+            <p className="text-gray-600">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : !loading.category && projects.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-600">
+              No projects found for this category.
+            </p>
+          </div>
+        ) : (
+          <motion.div
+            className={`${
+              activeLayout === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                : "flex flex-col gap-8 max-w-4xl mx-auto"
+            }`}
+            layout
+            transition={{ duration: 0.5 }}
+          >
+            {projects.map((project) => (
+              <EnhancedVideoCard
+                key={project.id}
+                project={project}
+                onClick={() => setSelectedProject(project)}
+              />
+            ))}
+          </motion.div>
+        )}
 
-        {/* Decorative elements (Original) */}
+        {/* Stats */}
         <motion.div
-          className="absolute top-40 left-10 w-3 h-3 rounded-full bg-teal-400"
-          animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-40 right-10 w-2 h-2 rounded-full bg-teal-500"
-          animate={{ scale: [1, 2, 1], opacity: [0.3, 0.7, 0.3] }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
+          className="mt-20 pt-8 border-t border-gray-200"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { label: "Total Projects", value: projects.length },
+              { label: "Categories", value: categories.length - 1 },
+              { label: "Tools Used", value: videoTools.length },
+              { label: "Editing Apps", value: 5 },
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 + 0.5 }}
+              >
+                <div className="text-3xl font-bold text-teal-600 mb-2">
+                  {stat.value}+
+                </div>
+                <div className="text-sm text-gray-600">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
 
-      {/* Simplified Modal Video Player (Original) */}
+      {/* Video Modal - Simplified without title and chips */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeModal}
           >
             <motion.div
-              className="relative w-full max-w-6xl bg-black rounded-xl overflow-hidden shadow-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25 }}
+              className="relative w-full max-w-6xl"
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{
+                type: "spring",
+                damping: 25,
+                stiffness: 300,
+              }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
-              <button
+              {/* Close button - positioned absolutely */}
+              <motion.button
                 onClick={closeModal}
-                className="absolute top-4 right-4 z-20 text-white hover:text-gray-300 transition-colors bg-black/50 rounded-full p-2"
+                className="absolute -top-12 right-0 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-20"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
               >
-                <FiX className="w-6 h-6" />
-              </button>
+                <FiX className="w-6 h-6 text-white" />
+              </motion.button>
 
-              {/* Video Player */}
-              <div className="w-full h-auto max-h-[80vh]">
+              {/* Video only - clean and minimal */}
+              <div className="rounded-xl overflow-hidden shadow-2xl">
                 <video
                   ref={modalVideoRef}
                   controls
                   autoPlay
-                  className="w-full h-full"
+                  className="w-full h-auto"
                   poster={selectedProject.thumbnail}
                 >
                   <source src={selectedProject.videoUrl} type="video/mp4" />
-                  Your browser does not support the video tag.
                 </video>
-              </div>
-
-              {/* Project Info */}
-              <div className="p-6 bg-white">
-                <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                      {selectedProject.title}
-                    </h2>
-                    <p className="text-gray-600 mb-4">
-                      {selectedProject.description}
-                    </p>
-                  </div>
-                  {selectedProject.technologies &&
-                    selectedProject.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProject.technologies.map((tech, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-teal-100 text-teal-700 text-sm rounded-full border border-teal-200"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Scrolling text effect at bottom (Original) */}
+      {/* Floating CTA */}
       <motion.div
-        className="absolute bottom-10 left-0 right-0 mx-auto w-full max-w-5xl px-4 overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
+        className="fixed bottom-8 right-8 z-40"
+        initial={{ opacity: 0, scale: 0.5, y: 50 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 1, type: "spring" }}
       >
-        <motion.div
-          className="text-gray-500 text-xs md:text-sm font-mono whitespace-nowrap"
-          animate={{ x: [0, -1000] }}
-          transition={{
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 30,
-              ease: "linear",
-            },
-          }}
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="p-3 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-300"
         >
-          • VIDEO EDITING • COLOR GRADING • MOTION GRAPHICS • VISUAL EFFECTS •
-          4K EDITING • DRONE FOOTAGE • CINEMATIC SEQUENCES • SOUND DESIGN •
-          VIDEO EDITING • COLOR GRADING • MOTION GRAPHICS • VISUAL EFFECTS • 4K
-          EDITING • DRONE FOOTAGE • CINEMATIC SEQUENCES • SOUND DESIGN •
-        </motion.div>
+          <FiFilm className="w-6 h-6 text-white" />
+        </button>
       </motion.div>
     </section>
   );

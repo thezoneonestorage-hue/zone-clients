@@ -28,7 +28,7 @@ const TestimonialSection = () => {
         setLoading(true);
         setError(null);
 
-        const response = await getReviews({ isBest: true });
+        const response = await getReviews();
 
         if (response.status === "success" && response.data?.reviews) {
           setCount(response.results);
