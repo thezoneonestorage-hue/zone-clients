@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,8 +8,8 @@ import {
   updateService,
   deleteService,
 } from "../services/api";
-import ServiceList from "../components/ServiceList";
-import ServiceModal from "../components/ServiceModal";
+const ServiceList = lazy(() => import("../components/ServiceList"));
+const ServiceModal = lazy(() => import("../components/ServiceModal"));
 
 const ServicesPage = () => {
   const navigate = useNavigate();

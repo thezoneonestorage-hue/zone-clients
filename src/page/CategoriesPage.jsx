@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,8 +8,8 @@ import {
   updateCategory,
   deleteCategory,
 } from "../services/api";
-import CategoryList from "../components/CategoryList";
-import CategoryModal from "../components/CategoryModal";
+const CategoryList = lazy(() => import("../components/CategoryList"));
+const CategoryModal = lazy(() => import("../components/CategoryModal"));
 
 const CategoriesPage = () => {
   const navigate = useNavigate();

@@ -10,8 +10,9 @@ import {
   getCategories,
   uploadFile,
 } from "../services/api";
-import VideoList from "../components/VideoList";
-import VideoModal from "../components/VideoModal";
+
+const VideoList = lazy(() => import("../components/VideoList"));
+const VideoModal = lazy(() => import("../components/VideoModal"));
 
 const VideosPage = () => {
   const navigate = useNavigate();

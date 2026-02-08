@@ -3,10 +3,8 @@ import { Suspense, lazy } from "react";
 import RootLayout from "./layouts/RootLayout";
 import LoadingSpinner from "./components/Shared/LoadingSpinner";
 import DashboardLayout from "./layouts/DashboardLayout";
-import Login from "./page/Login";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import NotFound from "./components/Shared/NotFundPage";
-import AboutPageAdmin from "./page/AboutPageAdmin";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./page/Home"));
@@ -23,6 +21,8 @@ const FaqsPage = lazy(() => import("./page/FaqsPage"));
 const Faqs = lazy(() => import("./page/Faqs"));
 const Settings = lazy(() => import("./page/Settings"));
 const StatisticsManagement = lazy(() => import("./page/StatisticsManagement"));
+const AboutPageAdmin = lazy(() => import("./page/AboutPageAdmin"));
+const Login = lazy(() => import("./page/Login"));
 
 const router = createBrowserRouter([
   {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,8 +10,8 @@ import {
   uploadFile,
   getVideoReviews, // Add this import
 } from "../services/api";
-import ReviewList from "../components/ReviewList";
-import ReviewModal from "../components/ReviewModal";
+const ReviewModal = lazy(() => import("../components/ReviewModal"));
+const ReviewList = lazy(() => import("../components/ReviewList"));
 
 const ReviewsPage = () => {
   const navigate = useNavigate();

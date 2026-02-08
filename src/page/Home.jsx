@@ -1,12 +1,6 @@
 // pages/Home.jsx
 import React, { lazy, Suspense, useEffect } from "react";
 import LazyLoader from "../components/Shared/LazyLoader";
-
-// Import components normally (for better initial load)
-import HeroSection from "../components/Home/HeroSection";
-import MotionCredibilityStrip from "../components/Shared/MotionCredibilityStrip";
-import MotionCredit from "../components/Home/MotionCredit";
-
 // Lazy load only the heavier components
 const FeaturedPortfolio = lazy(() =>
   import("../components/Home/FeaturedPortfolio")
@@ -18,6 +12,12 @@ const TestimonialSection = lazy(() =>
   import("../components/Home/TestimonialSection")
 );
 const CallToAction = lazy(() => import("../components/Home/CallToAction"));
+
+const MotionCredit = lazy(() => import("../components/Home/MotionCredit"));
+const HeroSection = lazy(() => import("../components/Home/HeroSection"));
+const MotionCredibilityStrip = lazy(() =>
+  import("../components/Shared/MotionCredibilityStrip")
+);
 
 // Loading placeholder component
 const SectionPlaceholder = ({ height = "60vh" }) => (

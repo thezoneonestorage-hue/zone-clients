@@ -7,10 +7,10 @@ import {
   FiShield,
   FiUser,
 } from "react-icons/fi";
-
 import { getCurrentUser } from "../services/api";
-import ContactTab from "../components/ContactTab";
-import SecurityTab from "../components/SecurityTab";
+
+const ContactTab = React.lazy(() => import("../components/ContactTab"));
+const SecurityTab = React.lazy(() => import("../components/SecurityTab"));
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("contact");
