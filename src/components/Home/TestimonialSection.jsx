@@ -346,7 +346,7 @@ const TestimonialSection = () => {
 
           {/* Quote with responsive text */}
           <motion.p
-            className="text-gray-700 text-xs lg:text-sm leading-relaxed mb-3 lg:mb-4 font-light relative z-10 line-clamp-3 flex-1"
+            className="text-gray-700 font-poppins text-xs lg:text-sm leading-relaxed mb-3 lg:mb-4 font-light relative z-10 line-clamp-3 flex-1"
             initial={{ opacity: 0, y: 10 }}
             animate={
               hasAnimated
@@ -363,7 +363,7 @@ const TestimonialSection = () => {
             }
           >
             <motion.span
-              className="text-xl lg:text-2xl text-teal-400 font-serif leading-none mr-1"
+              className="text-xl lg:text-2xl text-teal-400 font-allan leading-none mr-1"
               initial={{ scale: 0 }}
               animate={
                 hasAnimated
@@ -382,7 +382,7 @@ const TestimonialSection = () => {
             </motion.span>
             {testimonial.quote}
             <motion.span
-              className="text-xl lg:text-2xl text-teal-400 font-serif leading-none ml-1"
+              className="text-xl lg:text-2xl text-teal-400 font-allan leading-none ml-1"
               initial={{ scale: 0 }}
               animate={
                 hasAnimated
@@ -406,7 +406,7 @@ const TestimonialSection = () => {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <motion.div
-                  className="font-bold text-gray-800 text-xs lg:text-sm mb-0.5 lg:mb-1 truncate"
+                  className="font-bold text-gray-800 font-poppins text-xs lg:text-sm mb-0.5 lg:mb-1 truncate"
                   initial={{ opacity: 0, x: -10 }}
                   animate={
                     hasAnimated
@@ -424,7 +424,7 @@ const TestimonialSection = () => {
                   {testimonial.author}
                 </motion.div>
                 <motion.div
-                  className="text-gray-600 text-xs truncate"
+                  className="text-gray-600 text-xs font-poppins truncate"
                   initial={{ opacity: 0, x: -10 }}
                   animate={
                     hasAnimated
@@ -466,7 +466,7 @@ const TestimonialSection = () => {
                   transition: { duration: 0.2 },
                 }}
               >
-                <span className="text-white text-xs lg:text-sm font-bold font-mono whitespace-nowrap">
+                <span className="text-white font-allan text-xs lg:text-sm font-bold  whitespace-nowrap">
                   {testimonial.stats}
                 </span>
               </motion.div>
@@ -639,9 +639,11 @@ const TestimonialSection = () => {
           transition: { duration: 0.3 },
         }}
       >
-        <div className="text-center">
+        <div className="text-center font-allan">
           <div className="text-xl font-bold text-teal-600 mb-1">{count}+</div>
-          <div className="text-gray-600 text-xs font-mono">Happy Clients</div>
+          <div className="text-gray-600 text-xs font-poppins">
+            Happy Clients
+          </div>
         </div>
       </motion.div>
 
@@ -668,7 +670,7 @@ const TestimonialSection = () => {
         }}
       >
         <div className="text-center">
-          <div className="text-xl font-bold text-emerald-600 mb-1">
+          <div className="text-xl font-allan font-bold text-emerald-600 mb-1">
             {testimonials.length > 0
               ? (
                   testimonials.reduce((acc, curr) => acc + curr.rating, 0) /
@@ -676,7 +678,7 @@ const TestimonialSection = () => {
                 ).toFixed(1)
               : "5.0"}
           </div>
-          <div className="text-gray-600 text-xs font-mono">Avg Rating</div>
+          <div className="text-gray-600 text-xs font-poppins">Avg Rating</div>
         </div>
       </motion.div>
     </section>

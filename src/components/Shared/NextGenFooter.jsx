@@ -308,7 +308,7 @@ const NextGenFooter = () => {
   };
 
   return (
-    <footer className="relative bg-white border-t border-gray-200/50">
+    <footer className="relative font-poppins bg-white border-t border-gray-200/50">
       {/* Riddle Section */}
       <AnimatePresence>
         {showRiddles && (

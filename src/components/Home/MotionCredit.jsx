@@ -346,13 +346,13 @@ const MotionCredit = () => {
 
                 {/* Client Info */}
                 <div className="mt-4 md:mt-6 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900">
+                  <h3 className="text-lg font-anton md:text-xl font-bold text-gray-900">
                     {currentReview.name}
                   </h3>
-                  <p className="text-teal-600 font-medium text-sm md:text-base">
+                  <p className="text-teal-600 font-poppins font-medium text-sm md:text-base">
                     {currentReview.role}
                   </p>
-                  <p className="text-gray-500 text-xs md:text-sm">
+                  <p className="text-gray-500 font-poppins text-xs md:text-sm">
                     {currentReview.company}
                   </p>
                   <div className="mt-2 flex justify-center">
@@ -363,7 +363,7 @@ const MotionCredit = () => {
 
               {/* Review Text Section */}
               <div className="p-4 md:p-6 lg:p-8 flex flex-col justify-center">
-                <div className="mb-4 md:mb-6">
+                <div className="mb-4 font-poppins md:mb-6">
                   <div className="text-teal-500 text-4xl md:text-6xl mb-2 md:mb-4">
                     "
                   </div>
@@ -639,7 +639,7 @@ const MotionCredit = () => {
               }}
             >
               {/* First set */}
-              <div className="flex items-center">
+              <div className="flex font-allan items-center">
                 {scrollingItems.map((item, index) => (
                   <div
                     key={`first-${item.id}`}
@@ -665,7 +665,7 @@ const MotionCredit = () => {
               </div>
 
               {/* Duplicate set for seamless looping */}
-              <div className="flex items-center">
+              <div className="flex font-allan items-center">
                 {scrollingItems.map((item, index) => (
                   <div
                     key={`second-${item.id}`}
@@ -730,10 +730,10 @@ const MotionCredit = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-teal-600 mb-1 md:mb-2">
+                <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-teal-600 mb-1 md:mb-2">
                   {getVideosValue()}
                 </div>
-                <div className="text-gray-600 font-light tracking-wide text-sm md:text-base">
+                <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
                   Videos Delivered
                 </div>
               </div>
@@ -762,10 +762,10 @@ const MotionCredit = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-600 mb-1 md:mb-2">
+                <div className="text-3xl md:text-4xl font-anton lg:text-5xl font-bold text-emerald-600 mb-1 md:mb-2">
                   {getBrandsValue()}
                 </div>
-                <div className="text-gray-600 font-light tracking-wide text-sm md:text-base">
+                <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
                   Trusted Brands
                 </div>
               </div>
@@ -794,10 +794,10 @@ const MotionCredit = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-green-600 mb-1 md:mb-2">
+                <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-green-600 mb-1 md:mb-2">
                   {getYearsValue()}
                 </div>
-                <div className="text-gray-600 font-light tracking-wide text-sm md:text-base">
+                <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
                   Years Experience
                 </div>
               </div>

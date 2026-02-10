@@ -66,7 +66,7 @@ const SectionHeader = ({
       {/* Decorative dots - conditionally rendered */}
       {showDots && subtitle && (
         <div
-          className={`inline-flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 ${
+          className={`inline-flex font-poppins items-center gap-2 sm:gap-3 mb-3 sm:mb-4 ${
             center ? "justify-center" : "justify-start"
           }`}
         >
@@ -80,7 +80,7 @@ const SectionHeader = ({
 
       {/* Main title with highlight */}
       <h1
-        className={`${titleSizes[titleSize]} ${titleWeights[titleWeight]} ${lineSpacings[lineSpacing]} text-gray-800 mb-2 sm:mb-3 ${titleClassName}`}
+        className={`${titleSizes[titleSize]} ${titleWeights[titleWeight]} ${lineSpacings[lineSpacing]} text-gray-800 mb-2 sm:mb-3 font-anton ${titleClassName}`}
       >
         {title}
         {highlight && (
@@ -88,7 +88,7 @@ const SectionHeader = ({
             {/* Conditionally render line break - hidden on mobile for better flow */}
             {highlightOnNewLine && <br className="hidden sm:block" />}
             <span
-              className={`text-${highlightColor} ${titleWeights[highlightWeight]} ${highlightClassName}`}
+              className={`text-${highlightColor}  ${titleWeights[highlightWeight]} ${highlightClassName}`}
             >
               {highlightOnNewLine ? ` ${highlight}` : ` ${highlight}`}
             </span>
@@ -99,7 +99,9 @@ const SectionHeader = ({
       {/* Description */}
       {description && (
         <p
-          className={`text-gray-600 ${descriptionSizes[descriptionSize]} ${
+          className={`text-gray-600 font-poppins ${
+            descriptionSizes[descriptionSize]
+          } ${
             center ? "mx-auto" : ""
           } max-w-full sm:max-w-lg leading-relaxed px-2 sm:px-0`}
         >

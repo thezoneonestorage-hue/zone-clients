@@ -150,7 +150,7 @@ const LoadingSpinner = () => {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-white flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed font-poppins inset-0 w-full h-full bg-white flex items-center justify-center z-50 overflow-hidden">
       {/* Animated background canvas */}
       <canvas
         ref={canvasRef}

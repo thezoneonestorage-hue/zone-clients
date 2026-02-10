@@ -66,7 +66,7 @@ const CallToAction = () => {
   return (
     <section
       ref={ctaRef}
-      className="relative py-32 bg-gradient-to-b from-white to-gray-50 overflow-hidden"
+      className="relative py-32 bg-gradient-to-b font-poppins from-white to-gray-50 overflow-hidden"
     >
       {/* Animated circuit board background */}
       <div className="absolute inset-0 z-0 opacity-10">

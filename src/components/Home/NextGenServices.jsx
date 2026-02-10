@@ -499,16 +499,16 @@ const NextGenServices = () => {
                   {services[1].icon}
                 </div>
 
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-teal-600 rounded-2xl font-serif text-xl font-bold mb-6 border-2 border-teal-200 shadow-sm group-hover:bg-teal-50 transition-colors duration-300">
+                <div className="inline-flex font-allan items-center justify-center w-14 h-14 bg-white text-teal-600 rounded-2xl  text-xl font-bold mb-6 border-2 border-teal-200 shadow-sm group-hover:bg-teal-50 transition-colors duration-300">
                   {services[1].number}
                 </div>
 
                 <div className="space-y-5">
-                  <h2 className="text-2xl font-serif font-bold tracking-tight text-gray-800 leading-tight">
+                  <h2 className="text-2xl font-allan font-bold tracking-tight text-gray-800 leading-tight">
                     {services[1].title}
                   </h2>
                   <div className="h-1 w-16 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-80"></div>
-                  <p className="text-gray-600 leading-relaxed text-base font-light">
+                  <p className="text-gray-600 font-poppins leading-relaxed text-base font-light">
                     {services[1].description}
                   </p>
                 </div>
@@ -564,16 +564,16 @@ const NextGenServices = () => {
                   {services[0].icon}
                 </div>
 
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-emerald-600 rounded-2xl font-serif text-xl font-bold mb-6 border-2 border-emerald-200 shadow-sm group-hover:bg-emerald-50 transition-colors duration-300">
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-emerald-600 rounded-2xl font-allan text-xl font-bold mb-6 border-2 border-emerald-200 shadow-sm group-hover:bg-emerald-50 transition-colors duration-300">
                   {services[0].number}
                 </div>
 
                 <div className="space-y-5">
-                  <h2 className="text-2xl font-serif font-bold tracking-tight text-gray-800 leading-tight">
+                  <h2 className="text-2xl font-allan font-bold tracking-tight text-gray-800 leading-tight">
                     {services[0].title}
                   </h2>
                   <div className="h-1 w-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full opacity-80"></div>
-                  <p className="text-gray-600 leading-relaxed text-base font-light">
+                  <p className="text-gray-600 font-poppins leading-relaxed text-base font-light">
                     {services[0].description}
                   </p>
                 </div>
@@ -633,16 +633,16 @@ const NextGenServices = () => {
                     {services[3].icon}
                   </div>
 
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-teal-600 rounded-2xl font-serif text-xl font-bold mb-6 border-2 border-teal-200 shadow-sm group-hover:bg-teal-50 transition-colors duration-300">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-teal-600 rounded-2xl font-allan text-xl font-bold mb-6 border-2 border-teal-200 shadow-sm group-hover:bg-teal-50 transition-colors duration-300">
                     {services[3].number}
                   </div>
 
                   <div className="space-y-5">
-                    <h2 className="text-2xl font-serif font-bold tracking-tight text-gray-800 leading-tight">
+                    <h2 className="text-2xl font-allan font-bold tracking-tight text-gray-800 leading-tight">
                       {services[3].title}
                     </h2>
                     <div className="h-1 w-16 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-80"></div>
-                    <p className="text-gray-600 leading-relaxed text-base font-light">
+                    <p className="text-gray-600 font-poppins leading-relaxed text-base font-light">
                       {services[3].description}
                     </p>
                   </div>
@@ -704,16 +704,16 @@ const NextGenServices = () => {
                     {services[2].icon}
                   </div>
 
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-emerald-600 rounded-2xl font-serif text-xl font-bold mb-6 border-2 border-emerald-200 shadow-sm group-hover:bg-emerald-50 transition-colors duration-300">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-emerald-600 rounded-2xl font-allan text-xl font-bold mb-6 border-2 border-emerald-200 shadow-sm group-hover:bg-emerald-50 transition-colors duration-300">
                     {services[2].number}
                   </div>
 
                   <div className="space-y-5">
-                    <h2 className="text-2xl font-serif font-bold tracking-tight text-gray-800 leading-tight">
+                    <h2 className="text-2xl font-allan font-bold tracking-tight text-gray-800 leading-tight">
                       {services[2].title}
                     </h2>
                     <div className="h-1 w-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full opacity-80"></div>
-                    <p className="text-gray-600 leading-relaxed text-base font-light">
+                    <p className="text-gray-600 font-poppins leading-relaxed text-base font-light">
                       {services[2].description}
                     </p>
                   </div>
@@ -780,16 +780,16 @@ const NextGenServices = () => {
                     {services[5].icon}
                   </div>
 
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-teal-600 rounded-2xl font-serif text-xl font-bold mb-6 border-2 border-teal-200 shadow-sm group-hover:bg-teal-50 transition-colors duration-300">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-teal-600 rounded-2xl font-allan text-xl font-bold mb-6 border-2 border-teal-200 shadow-sm group-hover:bg-teal-50 transition-colors duration-300">
                     {services[5].number}
                   </div>
 
                   <div className="space-y-5">
-                    <h2 className="text-2xl font-serif font-bold tracking-tight text-gray-800 leading-tight">
+                    <h2 className="text-2xl font-allan font-bold tracking-tight text-gray-800 leading-tight">
                       {services[5].title}
                     </h2>
                     <div className="h-1 w-16 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full opacity-80"></div>
-                    <p className="text-gray-600 leading-relaxed text-base font-light">
+                    <p className="text-gray-600 font-poppins leading-relaxed text-base font-light">
                       {services[5].description}
                     </p>
                   </div>
@@ -851,16 +851,16 @@ const NextGenServices = () => {
                     {services[4].icon}
                   </div>
 
-                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-emerald-600 rounded-2xl font-serif text-xl font-bold mb-6 border-2 border-emerald-200 shadow-sm group-hover:bg-emerald-50 transition-colors duration-300">
+                  <div className="inline-flex items-center justify-center w-14 h-14 bg-white text-emerald-600 rounded-2xl font-allan text-xl font-bold mb-6 border-2 border-emerald-200 shadow-sm group-hover:bg-emerald-50 transition-colors duration-300">
                     {services[4].number}
                   </div>
 
                   <div className="space-y-5">
-                    <h2 className="text-2xl font-serif font-bold tracking-tight text-gray-800 leading-tight">
+                    <h2 className="text-2xl font-allan font-bold tracking-tight text-gray-800 leading-tight">
                       {services[4].title}
                     </h2>
                     <div className="h-1 w-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full opacity-80"></div>
-                    <p className="text-gray-600 leading-relaxed text-base font-light">
+                    <p className="text-gray-600 leading-relaxed font-poppins text-base font-light">
                       {services[4].description}
                     </p>
                   </div>
@@ -879,17 +879,17 @@ const NextGenServices = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.4 }}
         viewport={{ once: true }}
-        className="text-center mt-12 relative z-10 p-6"
+        className="text-center mt-12 relative z-10 p-6 font-poppins"
       >
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/80 border border-teal-200 shadow-sm mb-6">
           <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
-          <span className="text-teal-700 font-medium text-sm tracking-wide">
+          <span className="text-teal-700  font-medium text-sm tracking-wide">
             Ready to Start?
           </span>
           <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse"></div>
         </div>
 
-        <p className="text-gray-600 mb-8 max-w-2xl mx-auto text-lg">
+        <p className="text-gray-600  mb-8 max-w-2xl mx-auto text-lg">
           Ready to elevate your content with our professional editing services?
           Schedule a free consultation to discuss your project needs.
         </p>

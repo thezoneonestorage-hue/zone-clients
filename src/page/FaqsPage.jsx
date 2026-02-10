@@ -523,7 +523,7 @@ const FaqsPage = () => {
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-white via-teal-50 to-blue-50 py-10">
+    <div className="relative font-poppins min-h-screen w-full overflow-hidden bg-gradient-to-br from-white via-teal-50 to-blue-50 py-10">
       {/* Background Logo Animation */}
       <BackgroundLogoAnimation />
 
@@ -994,7 +994,7 @@ const FaqsPage = () => {
               </span>
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-anton font-bold text-gray-900 mb-4">
               We're Here to Help You
             </h2>
             <p className="text-gray-700 mb-8 max-w-2xl mx-auto">
@@ -1043,7 +1043,7 @@ const FaqsPage = () => {
         >
           {[...Array(3)].map((_, i) => (
             <React.Fragment key={i}>
-              <span className="text-teal-700 font-mono text-sm whitespace-nowrap">
+              <span className="text-teal-700 font-allan  text-sm whitespace-nowrap">
                 • VIDEO EDITING • COLOR GRADING • MOTION GRAPHICS • 4K QUALITY •
                 FAST TURNAROUND • PROFESSIONAL WORKFLOW • CINEMATIC RESULTS •
               </span>

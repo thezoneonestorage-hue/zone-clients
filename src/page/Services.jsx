@@ -235,7 +235,7 @@ const AnimatedLogoCard = ({ item, index }) => {
     >
       {/* Metric Badge - Smaller on mobile */}
       <div
-        className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-gradient-to-r ${item.color} text-white text-xs sm:text-sm font-bold shadow-lg z-10`}
+        className={`absolute font-poppins -top-2 -right-2 sm:-top-3 sm:-right-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-gradient-to-r ${item.color} text-white text-xs sm:text-sm font-bold shadow-lg z-10`}
       >
         {item.metric}
       </div>
@@ -250,12 +250,12 @@ const AnimatedLogoCard = ({ item, index }) => {
       </motion.div>
 
       {/* Title - Smaller text on mobile */}
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 relative z-10">
+      <h3 className="text-lg font-anton sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 relative z-10">
         {item.title}
       </h3>
 
       {/* Description - Smaller text on mobile */}
-      <p className="text-gray-700 text-xs sm:text-sm leading-relaxed relative z-10">
+      <p className="text-gray-700 font-poppins text-xs sm:text-sm leading-relaxed relative z-10">
         {item.description}
       </p>
     </motion.div>
@@ -267,7 +267,7 @@ const AnimatedComparisonCard = ({ item, index }) => {
   return (
     <motion.div
       key={index}
-      className="text-center p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl border border-gray-100 hover:border-teal-200 transition-all duration-300 relative overflow-hidden group hover:shadow-lg"
+      className="text-center p-4 sm:p-6 bg-gradient-to-br from-white  to-gray-50 rounded-xl sm:rounded-2xl border border-gray-100 hover:border-teal-200 transition-all duration-300 relative overflow-hidden group hover:shadow-lg"
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -761,10 +761,10 @@ const Services = () => {
     return (
       <div className="mb-12 sm:mb-20">
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+          <h2 className="text-2xl font-anton sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
             Real Client Results
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-lg px-4">
+          <p className="text-gray-600 font-poppins max-w-2xl mx-auto text-sm sm:text-lg px-4">
             See how we've helped content creators and businesses achieve their
             goals with professional video editing
           </p>
@@ -868,14 +868,14 @@ const Services = () => {
                       <h3
                         className={`${
                           isMobile ? "text-lg" : "text-xl"
-                        } font-bold text-gray-900`}
+                        } font-bold text-gray-900 font-anton`}
                       >
                         {currentReview.name}
                       </h3>
-                      <p className="text-teal-600 font-medium text-sm sm:text-base">
+                      <p className="text-teal-600 font-poppins font-medium text-sm sm:text-base">
                         {currentReview.role}
                       </p>
-                      <p className="text-gray-500 text-xs sm:text-sm">
+                      <p className="text-gray-500 font-poppins text-xs sm:text-sm">
                         {currentReview.company}
                       </p>
                       <div className="mt-1 sm:mt-2 flex justify-center">
@@ -899,7 +899,9 @@ const Services = () => {
 
                   {/* Review Text with Slide Transition */}
                   <div
-                    className={`${isMobile ? "h-32" : "h-48"} overflow-hidden`}
+                    className={`${
+                      isMobile ? "h-32" : "h-48"
+                    } overflow-hidden font-poppins`}
                   >
                     <AnimatePresence mode="wait" custom={direction}>
                       <motion.p
@@ -938,7 +940,7 @@ const Services = () => {
 
                 {/* Navigation Dots and Counter - Only show if multiple reviews */}
                 {videoReviews.length > 1 && (
-                  <div className="flex items-center justify-between mt-4 sm:mt-8">
+                  <div className="flex items-center font-poppins justify-between mt-4 sm:mt-8">
                     <div className="flex items-center space-x-2 sm:space-x-3">
                       {videoReviews.map((_, index) => (
                         <motion.button
@@ -1029,7 +1031,7 @@ const Services = () => {
 
     if (error && services.length === 0) {
       return (
-        <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+        <div className="relative font-poppins py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
           <div className="flex items-center justify-center h-64">
             <div className="text-center px-4">
               <div className="text-5xl mb-4 text-teal-400">🎬</div>
@@ -1051,7 +1053,7 @@ const Services = () => {
 
     if (!loading && services.length === 0) {
       return (
-        <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+        <div className="relative py-8 sm:py-12 font-poppins overflow-hidden mb-12 sm:mb-20">
           <div className="flex items-center justify-center h-64">
             <div className="text-center px-4">
               <div className="text-5xl mb-4 text-teal-400">🎬</div>
@@ -1076,7 +1078,7 @@ const Services = () => {
 
     // Normal services marquee rendering when we have services
     return (
-      <div className="relative py-8 sm:py-12 overflow-hidden mb-12 sm:mb-20">
+      <div className="relative py-8 sm:py-12 overflow-hidden mb-12 font-poppins sm:mb-20">
         {/* Single Marquee for Mobile, Double for Desktop */}
         <div className="hidden sm:block">
           {/* Top Marquee - Desktop Only */}
@@ -1106,7 +1108,7 @@ const Services = () => {
                         </motion.div>
 
                         {/* Title */}
-                        <h3 className="mb-2 sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
+                        <h3 className="mb-2 font-anton sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
                           {service.title}
                         </h3>
 
@@ -1136,7 +1138,7 @@ const Services = () => {
 
           {/* Bottom Marquee - Desktop Only */}
           <div className="flex">
-            <div className="flex space-x-4 sm:space-x-5 animate-marquee-right">
+            <div className="flex space-x-4 font-poppins sm:space-x-5 animate-marquee-right">
               {marqueeServices
                 .slice(
                   Math.min(4, marqueeServices.length),
@@ -1164,7 +1166,7 @@ const Services = () => {
                         </motion.div>
 
                         {/* Title */}
-                        <h3 className="mb-2 sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
+                        <h3 className="mb-2 font-anton sm:mb-3 text-base sm:text-lg font-bold leading-tight tracking-tight text-gray-800 group-hover:text-teal-600 transition-colors duration-300">
                           {service.title}
                         </h3>
 
@@ -1248,7 +1250,7 @@ const Services = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-white flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 sm:pb-10 overflow-hidden">
+    <div className="relative min-h-screen font-poppins w-full bg-white flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 sm:pb-10 overflow-hidden">
       {/* Subtle Teal Gradient Orbs Background - Mobile Optimized */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Top Left */}
@@ -1377,10 +1379,10 @@ const Services = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-2 relative z-10">
+            <h2 className="text-2xl font-anton sm:text-3xl font-bold text-center text-gray-900 mb-2 relative z-10">
               The Real Difference
             </h2>
-            <p className="text-gray-600 text-center mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base relative z-10 px-2">
+            <p className="text-gray-600 font-poppins text-center mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base relative z-10 px-2">
               See how we solve the biggest frustrations content creators face
               with other editors
             </p>
@@ -1480,7 +1482,7 @@ const Services = () => {
           viewport={{ once: true }}
         >
           <motion.h2
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-3 sm:mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl font-anton font-bold text-gray-800 mb-3 sm:mb-4"
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -1490,7 +1492,7 @@ const Services = () => {
           </motion.h2>
 
           <motion.p
-            className="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto mb-4 sm:mb-8"
+            className="text-gray-600 text-sm sm:text-base font-poppins max-w-2xl mx-auto mb-4 sm:mb-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}

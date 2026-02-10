@@ -195,7 +195,7 @@ const NextGenNavbar = () => {
   return (
     <motion.nav
       ref={navbarRef}
-      className={`fixed w-full z-50 transition-all duration-500 ${
+      className={`fixed w-full z-50 transition-all font-poppins duration-500 ${
         scrolled
           ? "bg-white/95 backdrop-blur-md py-2 border-b border-teal-200 shadow-sm"
           : "bg-transparent py-4"

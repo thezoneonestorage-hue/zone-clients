@@ -470,7 +470,7 @@ const HeroSection = () => {
               <div className="w-2 h-2 bg-yellow-500 rounded-full shadow-sm"></div>
               <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm"></div>
             </div>
-            <p className="text-gray-800 font-semibold text-sm">
+            <p className="text-gray-800 font-poppins font-semibold text-sm">
               Experience Our Creative Process
             </p>
           </div>
@@ -580,7 +580,10 @@ const HeroSection = () => {
             }}
           >
             {[...marqueeItems, ...marqueeItems].map((tech, index) => (
-              <div key={index} className="flex items-center gap-8 shrink-0">
+              <div
+                key={index}
+                className="flex font-allan items-center gap-8 shrink-0"
+              >
                 <motion.span
                   className="text-gray-800 font-bold text-xs whitespace-nowrap"
                   whileHover={{

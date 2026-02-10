@@ -483,7 +483,7 @@ const ContactPage = () => {
   ];
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-gray-50 to-white flex flex-col items-center justify-center pt-16 pb-8 overflow-hidden">
+    <div className="relative min-h-screen w-full bg-gradient-to-br font-poppins from-gray-50 to-white flex flex-col items-center justify-center pt-16 pb-8 overflow-hidden">
       {/* Animated Background Canvas */}
       <canvas
         ref={canvasRef}

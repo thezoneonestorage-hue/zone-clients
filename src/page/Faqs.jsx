@@ -387,7 +387,7 @@ const Faqs = () => {
 
     return (
       <div
-        className="stagger-item card-hover bg-white rounded-xl border border-gray-200 p-5 mb-3"
+        className="stagger-item card-hover font-poppins bg-white rounded-xl border border-gray-200 p-5 mb-3"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ animationDelay: `${index * 50}ms` }}
@@ -481,7 +481,7 @@ const Faqs = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6 smooth-scroll page-transition">
+    <div className="min-h-screen bg-gradient-to-br font-poppins from-gray-50 to-gray-100 p-4 md:p-6 smooth-scroll page-transition">
       <div className="max-w-7xl mx-auto">
         {/* Header with animation */}
         <div className="animate-fadeInUp mb-8">

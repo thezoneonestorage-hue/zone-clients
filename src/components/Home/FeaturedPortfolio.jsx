@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getVideoReels } from "../../services/api";
 import SectionHeader from "../Shared/SectionHeader";
+import { useNavigate } from "react-router-dom";
 
 const FeaturedPortfolio = () => {
   const [activeVideo, setActiveVideo] = useState(0);
@@ -12,6 +13,7 @@ const FeaturedPortfolio = () => {
   const [showTitle, setShowTitle] = useState(true);
   const [showPlayButton, setShowPlayButton] = useState(true);
   const videoRef = useRef(null);
+  const navigate = useNavigate();
 
   // Fetch videos from API
   useEffect(() => {
@@ -230,10 +232,10 @@ const FeaturedPortfolio = () => {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base md:text-lg lg:text-xl font-light text-gray-800 mb-1 line-clamp-1">
+                        <h3 className="text-base font-anton md:text-lg lg:text-xl font-light text-gray-800 mb-1 line-clamp-1">
                           {currentVideo.title}
                         </h3>
-                        <p className="text-gray-600 text-xs leading-relaxed line-clamp-2 md:line-clamp-3">
+                        <p className="text-gray-600 font-poppins text-xs leading-relaxed line-clamp-2 md:line-clamp-3">
                           {currentVideo.description}
                         </p>
                       </div>
@@ -279,11 +281,11 @@ const FeaturedPortfolio = () => {
           </div>
 
           {/* Right Column - Navigation and Details */}
-          <div className="lg:col-span-4 space-y-4 md:space-y-6">
+          <div className="lg:col-span-4 space-y-4 font-poppins md:space-y-6">
             {/* Video Navigation */}
             <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-5 shadow-lg border border-gray-100">
               <div className="flex items-center justify-between mb-3 md:mb-4">
-                <h3 className="text-sm md:text-base font-medium text-gray-800">
+                <h3 className="text-sm  md:text-base font-medium text-gray-800">
                   Browse Collection
                 </h3>
                 <div className="text-xs text-gray-500">
@@ -452,6 +454,7 @@ const FeaturedPortfolio = () => {
               <motion.button
                 whileHover={{ scale: window.innerWidth >= 768 ? 1.02 : 1 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => navigate("/contact")}
                 className="w-full bg-white text-teal-600 py-2 md:py-2.5 rounded-lg md:rounded-xl font-medium transition-colors hover:bg-gray-100 text-sm"
               >
                 Start Project
@@ -459,30 +462,6 @@ const FeaturedPortfolio = () => {
             </motion.div>
           </div>
         </div>
-
-        {/* Bottom Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-12 lg:mt-16"
-        >
-          {[
-            { number: "50+", label: "Projects Completed" },
-            { number: "15+", label: "Creative Awards" },
-            { number: "98%", label: "Client Satisfaction" },
-            { number: "24/7", label: "Creative Support" },
-          ].map((stat, index) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-xl md:text-2xl lg:text-3xl font-light text-gray-800 mb-1">
-                {stat.number}
-              </div>
-              <div className="text-gray-600 text-xs md:text-sm leading-tight">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </motion.div>
       </div>
 
       {/* Custom Animations */}

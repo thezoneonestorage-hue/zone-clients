@@ -135,7 +135,7 @@ const AboutUs = () => {
   } = aboutData;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-emerald-50/30">
+    <div className="min-h-screen bg-gradient-to-br font-poppins from-teal-50 via-white to-emerald-50/30">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
         <motion.div
@@ -149,7 +149,7 @@ const AboutUs = () => {
             <span>About {agencyInfo?.name || "VisionCraft"}</span>
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl font-anton md:text-6xl font-bold text-gray-900 mb-6">
             {agencyInfo?.tagline || "We Craft Visual Stories"}
           </h1>
 
@@ -187,7 +187,7 @@ const AboutUs = () => {
                   <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center">
                     <FaVideo className="w-4 h-4 text-white" />
                   </div>
-                  <span className="font-bold text-gray-900">
+                  <span className="font-bold font-anton text-gray-900">
                     {agencyInfo?.name || "VisionCraft"} HQ
                   </span>
                 </div>
@@ -195,7 +195,7 @@ const AboutUs = () => {
             </div>
 
             {/* Floating Social Media Cards */}
-            <div className="absolute -bottom-6 -right-6">
+            <div className="absolute -bottom-6 font-allan -right-6">
               <div className="bg-white rounded-2xl p-4 shadow-xl border border-gray-200">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl flex items-center justify-center">
@@ -217,14 +217,13 @@ const AboutUs = () => {
               <span>Our Story & Vision</span>
             </div>
 
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="text-4xl font-anton font-bold text-gray-900">
               Where Creativity Meets{" "}
               <span className="text-teal-600">Technology</span>
             </h2>
 
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
-                Founded in {agencyInfo?.foundedYear || 2015},{" "}
                 <strong>{agencyInfo?.name || "VisionCraft"}</strong>{" "}
                 {agencyInfo?.description ||
                   "began as a small studio with a big dream: to revolutionize visual storytelling through cutting-edge technology and artistic vision. Today, we're a globally recognized creative agency specializing in video production, motion design, and digital experiences."}
@@ -295,10 +294,11 @@ const AboutUs = () => {
               transition={{ duration: 0.6 }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Trusted by Leading Brands
+              <h2 className="text-3xl font-anton font-bold text-gray-900 mb-4">
+                <span className="text-teal-500"> Trusted </span> by Leading
+                Brands
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-gray-600 font-poppins max-w-2xl mx-auto">
                 We've partnered with industry leaders to create exceptional
                 visual content
               </p>
@@ -366,8 +366,8 @@ const AboutUs = () => {
               transition={{ duration: 0.6 }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Our Achievements
+              <h2 className="text-4xl font-anton font-bold text-gray-900 mb-4">
+                Our <span className="text-teal-500"> Achievements </span>
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 Recognized for excellence in creative innovation and technical
@@ -376,7 +376,7 @@ const AboutUs = () => {
             </motion.div>
 
             {/* Achievement Carousel */}
-            <div className="relative max-w-6xl mx-auto">
+            <div className="relative max-w-6xl mx-auto font-poppins">
               <div className="flex flex-col lg:flex-row gap-8 items-center">
                 {/* Achievement Images */}
                 <div className="lg:w-2/3 relative">
@@ -516,8 +516,8 @@ const AboutUs = () => {
               transition={{ duration: 0.6 }}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Meet Our Team
+              <h2 className="text-4xl font-anton font-bold text-gray-900 mb-4">
+                Meet <span className="text-teal-500 "> Our Team</span>
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 Click or hover on cards to see team member details and social
@@ -697,7 +697,7 @@ const AboutUs = () => {
               <FaVideo className="w-10 h-10 text-white" />
             </div>
 
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl font-anton font-bold text-gray-900 mb-6">
               Ready to Create Something Amazing?
             </h2>
 
