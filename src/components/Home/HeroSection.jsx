@@ -284,6 +284,7 @@ const HeroSection = () => {
   const [loadingIntroduction, setLoadingIntroduction] = useState(true);
   const [introductionVideo, setIntroductionVideo] = useState(null);
   const [showPlayButton, setShowPlayButton] = useState(true);
+  const [autoplayAttempted, setAutoplayAttempted] = useState(false);
 
   // Booking modal state
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -338,7 +339,28 @@ const HeroSection = () => {
     fetchIntroductionVideo();
   }, []);
 
-  // Video event handlers
+  // Attempt autoplay when component mounts and user has interacted with page
+  useEffect(() => {
+    // Add a global click handler to detect user interaction
+    const handleUserInteraction = () => {
+      if (videoRef.current && !autoplayAttempted && !loadingIntroduction) {
+        attemptAutoplay();
+      }
+    };
+
+    // Listen for user interaction on the whole document
+    document.addEventListener("click", handleUserInteraction);
+    document.addEventListener("touchstart", handleUserInteraction);
+    document.addEventListener("keydown", handleUserInteraction);
+
+    return () => {
+      document.removeEventListener("click", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
+      document.removeEventListener("keydown", handleUserInteraction);
+    };
+  }, [autoplayAttempted, loadingIntroduction]);
+
+  // Video event handlers and autoplay logic
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -358,24 +380,90 @@ const HeroSection = () => {
       setShowPlayButton(true);
     };
 
+    const handleLoadedData = () => {
+      // Try to autoplay when video is loaded
+      if (!autoplayAttempted) {
+        attemptAutoplay();
+      }
+    };
+
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
+    video.addEventListener("loadeddata", handleLoadedData);
 
     return () => {
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("loadeddata", handleLoadedData);
     };
-  }, []);
+  }, [autoplayAttempted]);
+
+  const attemptAutoplay = async () => {
+    const video = videoRef.current;
+    if (!video || autoplayAttempted) return;
+
+    setAutoplayAttempted(true);
+
+    try {
+      // Try to play with sound
+      await video.play();
+
+      // If successful, update state
+      setVideoPlaying(true);
+      setShowPlayButton(false);
+      console.log("Autoplay with sound successful!");
+    } catch (error) {
+      console.log("Autoplay with sound blocked by browser:", error);
+
+      // Fallback 1: Try muted autoplay first, then unmute
+      try {
+        video.muted = true;
+        await video.play();
+        setVideoPlaying(true);
+        setShowPlayButton(false);
+
+        // Try to unmute after a short delay
+        setTimeout(() => {
+          video.muted = false;
+        }, 1000);
+
+        console.log("Autoplay with muted start successful");
+      } catch (mutedError) {
+        console.log("Muted autoplay also blocked:", mutedError);
+        setShowPlayButton(true);
+      }
+    }
+  };
+
+  // Trigger autoplay when video source changes
+  useEffect(() => {
+    if (!loadingIntroduction && videoRef.current && !autoplayAttempted) {
+      // Wait a bit for the DOM to be ready and try autoplay
+      const timer = setTimeout(() => {
+        attemptAutoplay();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loadingIntroduction, autoplayAttempted]);
 
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (videoRef.current.paused || videoRef.current.ended) {
-        videoRef.current.play();
-        setShowPlayButton(false);
+        videoRef.current
+          .play()
+          .then(() => {
+            setVideoPlaying(true);
+            setShowPlayButton(false);
+          })
+          .catch((error) => {
+            console.log("Manual play failed:", error);
+          });
       } else {
         videoRef.current.pause();
+        setVideoPlaying(false);
         setShowPlayButton(true);
       }
     }
@@ -497,7 +585,7 @@ const HeroSection = () => {
             </div>
           ) : (
             <>
-              {/* Default HTML5 Video Player */}
+              {/* HTML5 Video Player with sound */}
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"
@@ -505,7 +593,8 @@ const HeroSection = () => {
                 controls
                 controlsList="nodownload"
                 playsInline
-                preload="metadata"
+                preload="auto"
+                loop
               >
                 <source src={videoSource} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -514,16 +603,41 @@ const HeroSection = () => {
               {/* File Name Display */}
               <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-lg text-xs font-semibold z-20 shadow-md border border-gray-200">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-sm"></div>
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full shadow-sm ${
+                      videoPlaying
+                        ? "bg-green-500 animate-pulse"
+                        : "bg-yellow-500"
+                    }`}
+                  ></div>
                   <span className="text-gray-800">▶ {videoTitle}</span>
+                  {videoPlaying && (
+                    <motion.div
+                      className="flex items-center gap-1 ml-2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <svg
+                        className="w-3 h-3 text-teal-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </motion.div>
+                  )}
                 </div>
               </div>
 
-              {/* Simple Play Button Overlay */}
+              {/* Simple Play Button Overlay - Only shown if video is not playing */}
               <AnimatePresence>
                 {showPlayButton && (
                   <motion.div
-                    className="absolute inset-0 flex items-center justify-center z-20 cursor-pointer bg-black/20 backdrop-blur-sm"
+                    className="absolute inset-0 flex items-center justify-center z-20 cursor-pointer bg-black/10 backdrop-blur-sm"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -531,16 +645,16 @@ const HeroSection = () => {
                     onClick={handlePlayPause}
                   >
                     <motion.div
-                      className="relative w-20 h-20 bg-white/95 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md border-2 border-white/50"
+                      className="relative w-24 h-24 bg-gradient-to-br from-white to-gray-100 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md border-2 border-white/60"
                       whileHover={{
                         scale: 1.1,
-                        backgroundColor: "rgba(255, 255, 255, 1)",
+                        boxShadow: "0 0 40px rgba(13, 148, 136, 0.3)",
                       }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                     >
                       <svg
-                        className="w-10 h-10 text-gray-800 ml-1"
+                        className="w-12 h-12 text-gray-800 ml-1"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
@@ -550,6 +664,20 @@ const HeroSection = () => {
                           d="M8 5v14l11-7z"
                         />
                       </svg>
+                      <motion.div
+                        className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-teal-600/95 text-white text-xs px-3 py-1.5 rounded-md whitespace-nowrap opacity-0"
+                        animate={{
+                          opacity: [0, 1, 0],
+                          y: [10, 0, 10],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        Click to play
+                      </motion.div>
                     </motion.div>
                   </motion.div>
                 )}
