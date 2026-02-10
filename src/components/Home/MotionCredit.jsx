@@ -7,7 +7,7 @@ const MotionCredit = () => {
   const controls = useAnimation();
   const ref = useRef(null);
   const canvasRef = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 }); // Reduced amount for mobile
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
 
   const [statistics, setStatistics] = useState([]);
   const [videoReviews, setVideoReviews] = useState([]);
@@ -15,8 +15,10 @@ const MotionCredit = () => {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Video Reviews State
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  // Marquee State
+  const [isPaused, setIsPaused] = useState(false);
+  const [hoveredCardIndex, setHoveredCardIndex] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Fetch statistics data
   useEffect(() => {
@@ -54,17 +56,20 @@ const MotionCredit = () => {
             name: review.userName,
             role: review.user?.role || "Client",
             company: review.user?.company || "Satisfied Client",
-            videoThumbnail: getVideoThumbnail(review.video),
             review: review.content,
-            rating: review.rating,
-            stats: getPerformanceStats(review.rating),
-            duration: getVideoDuration(review.video),
+            rating: review.rating || 5,
+            stats: getPerformanceStats(review.rating || 5),
             videoUrl: review.video,
             isBest: review.isBest,
             user: review.user,
           })) || [];
 
-        setVideoReviews(transformedReviews);
+        // Duplicate for seamless marquee
+        const duplicatedReviews = [
+          ...transformedReviews,
+          ...transformedReviews,
+        ];
+        setVideoReviews(duplicatedReviews);
       } catch (err) {
         console.error("Error fetching video reviews:", err);
         setVideoReviews(getFallbackReviews());
@@ -77,31 +82,6 @@ const MotionCredit = () => {
   }, []);
 
   // Helper functions
-  const getVideoThumbnail = (videoUrl) => {
-    if (!videoUrl) return getDefaultThumbnail();
-    if (videoUrl.includes("cloudinary.com")) {
-      return videoUrl.replace(
-        "/upload/",
-        "/upload/w_600,h_400,c_fill,q_auto,f_auto/"
-      );
-    }
-    return getDefaultThumbnail();
-  };
-
-  const getVideoDuration = (videoUrl) => {
-    const durations = ["1:45", "2:30", "3:15", "4:20", "2:50"];
-    return durations[Math.floor(Math.random() * durations.length)];
-  };
-
-  const getDefaultThumbnail = () => {
-    const thumbnails = [
-      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=400&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=400&fit=crop",
-    ];
-    return thumbnails[Math.floor(Math.random() * thumbnails.length)];
-  };
-
   const getPerformanceStats = (rating) => {
     const stats = {
       1: "Quality work delivered",
@@ -113,40 +93,234 @@ const MotionCredit = () => {
     return stats[rating] || "Professional service delivered";
   };
 
-  const getFallbackReviews = () => [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      role: "Content Creator",
-      company: "Beauty Vlog",
-      videoThumbnail:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=600&h=400&fit=crop",
-      review:
-        "I was amazed by how quickly they turned around my weekly vlog. The editing was so professional and they perfectly captured my brand's aesthetic.",
-      rating: 5,
-      stats: "3x faster delivery than my previous editor",
-      duration: "2:34",
-      videoUrl:
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      isBest: true,
-    },
-    {
-      id: 2,
-      name: "Mike Chen",
-      role: "Marketing Director",
-      company: "TechStart Inc",
-      videoThumbnail:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
-      review:
-        "Our product launch video needed to be perfect, and they delivered beyond expectations. The attention to detail was exceptional.",
-      rating: 5,
-      stats: "215% increase in engagement",
-      duration: "1:45",
-      videoUrl:
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-      isBest: false,
-    },
-  ];
+  const getFallbackReviews = () => {
+    const fallbackReviews = [
+      {
+        id: 1,
+        name: "Sarah Johnson",
+        role: "Content Creator",
+        company: "Beauty Vlog",
+        review:
+          "I was amazed by how quickly they turned around my weekly vlog. The editing was so professional and they perfectly captured my brand's aesthetic.",
+        rating: 5,
+        stats: "Exceptional service delivery with 3x faster turnaround",
+        videoUrl:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        isBest: true,
+      },
+      {
+        id: 2,
+        name: "Mike Chen",
+        role: "Marketing Director",
+        company: "TechStart Inc",
+        review:
+          "Our product launch video needed to be perfect, and they delivered beyond expectations. The attention to detail was exceptional.",
+        rating: 5,
+        stats: "Exceptional service delivery with 215% engagement increase",
+        videoUrl:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        isBest: false,
+      },
+      {
+        id: 3,
+        name: "Alex Rodriguez",
+        role: "YouTube Creator",
+        company: "Tech Reviews",
+        review:
+          "Consistent quality and fast turnaround times. Perfect for content creators who need reliable editing services every week.",
+        rating: 5,
+        stats: "Exceptional service delivery with 2x subscriber growth",
+        videoUrl:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        isBest: true,
+      },
+    ];
+    return [...fallbackReviews, ...fallbackReviews]; // Duplicate for marquee
+  };
+
+  // Star rating component
+  const StarRating = ({ rating, size = "sm" }) => (
+    <div className="flex items-center space-x-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          className={`${size === "xs" ? "text-xs" : "text-sm"} ${
+            star <= rating ? "text-yellow-400" : "text-gray-300"
+          }`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+
+  // Video Player Component without Thumbnail
+  const SimpleVideoPlayer = ({ videoUrl, isPlaying, onPlay, onPause }) => {
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+      if (videoRef.current) {
+        if (isPlaying) {
+          videoRef.current.play();
+        } else {
+          videoRef.current.pause();
+        }
+      }
+    }, [isPlaying]);
+
+    return (
+      <div className="relative w-full h-full">
+        {!isPlaying ? (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-teal-900/20 to-emerald-900/20 rounded-lg">
+            <button
+              className="w-14 h-14 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300"
+              onClick={onPlay}
+            >
+              <svg
+                className="w-6 h-6 text-teal-600 ml-1"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div className="relative w-full h-full">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover rounded-lg"
+              controls
+              onPause={onPause}
+              onEnded={onPause}
+            >
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <button
+              onClick={onPause}
+              className="absolute top-3 right-3 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Compact Video Card Component without thumbnail
+  const CompactVideoCard = ({ review, index }) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const handlePlay = (e) => {
+      e.stopPropagation();
+      setIsPlaying(true);
+    };
+
+    const handlePause = (e) => {
+      e.stopPropagation();
+      setIsPlaying(false);
+    };
+
+    return (
+      <div
+        className="relative group w-[320px] flex-shrink-0"
+        onMouseEnter={() => {
+          setIsHovered(true);
+          setHoveredCardIndex(index);
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setHoveredCardIndex(null);
+        }}
+      >
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] h-full flex flex-col">
+          {/* Card Content - Flex column for consistent height */}
+          <div className="p-4 flex-grow flex flex-col">
+            {/* Video Section - Fixed height without thumbnail */}
+            <div className="relative rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-teal-50 to-emerald-50 flex-shrink-0 h-44">
+              <SimpleVideoPlayer
+                videoUrl={review.videoUrl}
+                isPlaying={isPlaying}
+                onPlay={handlePlay}
+                onPause={handlePause}
+              />
+            </div>
+
+            {/* Description Section */}
+            <div className="mb-3 flex-shrink-0">
+              <div className="inline-flex items-center mb-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full mr-2"></div>
+                <p className="text-teal-700 font-semibold text-sm">
+                  {review.stats}
+                </p>
+              </div>
+            </div>
+
+            {/* Review Text - Flexible height with min-height */}
+            <div className="mb-4 flex-grow min-h-[80px]">
+              <div className="relative h-full">
+                <div className="text-4xl text-teal-500/20 absolute -top-2 -left-1">
+                  "
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed pl-4 line-clamp-4">
+                  {review.review}
+                </p>
+              </div>
+            </div>
+
+            {/* Client Info - Bottom Section - Fixed at bottom */}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 flex items-center justify-center text-white font-bold text-sm mr-3 shadow-md">
+                  {review.name.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 text-base">
+                    {review.name}
+                  </h4>
+                  <div className="flex items-center mt-0.5">
+                    <p className="text-teal-600 text-xs mr-2">{review.role}</p>
+                    <span className="text-gray-300 text-xs">•</span>
+                    <p className="text-gray-500 text-xs ml-2">
+                      {review.company}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Star Rating */}
+              <div className="text-right">
+                <StarRating rating={review.rating} size="xs" />
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Gradient Line */}
+          <div className="h-1.5 bg-gradient-to-r from-teal-500 via-emerald-500 to-green-500 flex-shrink-0"></div>
+        </div>
+
+        {/* Hover Glow Effect */}
+        {isHovered && (
+          <div className="absolute -inset-2 bg-gradient-to-r from-teal-400/10 to-emerald-400/10 rounded-2xl blur-xl transition-opacity duration-300 -z-10"></div>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (isInView) {
@@ -154,64 +328,25 @@ const MotionCredit = () => {
     }
   }, [isInView, controls]);
 
-  // Navigation functions
-  const nextReview = () => {
-    if (videoReviews.length === 0) return;
-    setCurrentReviewIndex((prev) => (prev + 1) % videoReviews.length);
+  const handleCardHover = (index) => {
+    setHoveredCardIndex(index);
   };
 
-  const prevReview = () => {
-    if (videoReviews.length === 0) return;
-    setCurrentReviewIndex(
-      (prev) => (prev - 1 + videoReviews.length) % videoReviews.length
-    );
+  const handleCardLeave = () => {
+    setHoveredCardIndex(null);
   };
 
-  // Star rating component
-  const StarRating = ({ rating }) => {
-    return (
-      <div className="flex items-center space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            className={`text-sm md:text-lg ${
-              star <= rating ? "text-yellow-400" : "text-gray-400"
-            }`}
-          >
-            ★
-          </span>
-        ))}
-      </div>
-    );
+  const handlePauseToggle = () => {
+    setIsTransitioning(true);
+    setIsPaused(!isPaused);
+
+    // Smooth transition delay
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 300);
   };
 
-  // Simple Video Player Component
-  const VideoPlayer = ({ videoUrl, thumbnail }) => {
-    return (
-      <div className="relative rounded-xl md:rounded-2xl overflow-hidden shadow-lg md:shadow-2xl h-48 sm:h-56 md:h-64 lg:h-80 bg-black">
-        {/* Default HTML5 Video Player */}
-        <video
-          className="w-full h-full object-cover"
-          poster={thumbnail}
-          controls
-          controlsList="nodownload"
-          preload="metadata"
-        >
-          <source src={videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-
-        {/* Best Review Badge */}
-        {videoReviews[currentReviewIndex]?.isBest && (
-          <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-yellow-500 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium z-10">
-            ⭐ Featured
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Video Review Component
+  // Marquee Video Reviews Section
   const VideoReviewSection = () => {
     if (reviewsLoading) {
       return (
@@ -241,172 +376,146 @@ const MotionCredit = () => {
       );
     }
 
-    const currentReview = videoReviews[currentReviewIndex];
-
     return (
       <div className="mb-12 md:mb-20">
-        <div className="max-w-6xl mx-auto px-2 sm:px-4">
-          {/* Card Container */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-gray-200 shadow-xl md:shadow-2xl overflow-hidden relative">
-            {/* Navigation Buttons - Only show if multiple reviews */}
-            {videoReviews.length > 1 && (
-              <>
-                {/* Mobile Navigation - Bottom */}
-                <div className="block md:hidden absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-4 z-10">
-                  <button
-                    onClick={prevReview}
-                    className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 border border-gray-200"
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Marquee Controls */}
+          <div className="flex items-center justify-center space-x-4 mb-6">
+            <button
+              onClick={handlePauseToggle}
+              disabled={isTransitioning}
+              className={`px-4 py-2 bg-white border border-gray-200 rounded-lg flex items-center hover:bg-gray-50 transition-all duration-300 shadow-sm text-sm md:text-base ${
+                isTransitioning ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            >
+              {isPaused ? (
+                <>
+                  <motion.svg
+                    key="play"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-5 h-5 text-teal-600 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-5 h-5 text-gray-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={nextReview}
-                    className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 border border-gray-200"
+                    <path d="M8 5v14l11-7z" />
+                  </motion.svg>
+                  <motion.span
+                    key="play-text"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2, delay: 0.1 }}
                   >
-                    <svg
-                      className="w-5 h-5 text-gray-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Desktop Navigation - Sides */}
-                <div className="hidden md:flex absolute top-1/2 left-4 right-4 transform -translate-y-1/2 justify-between z-10">
-                  <button
-                    onClick={prevReview}
-                    className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 border border-gray-200"
+                    Resume Auto-scroll
+                  </motion.span>
+                </>
+              ) : (
+                <>
+                  <motion.svg
+                    key="pause"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-5 h-5 text-teal-600 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-6 h-6 text-gray-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={nextReview}
-                    className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 border border-gray-200"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </motion.svg>
+                  <motion.span
+                    key="pause-text"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2, delay: 0.1 }}
                   >
-                    <svg
-                      className="w-6 h-6 text-gray-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </>
-            )}
+                    Pause Auto-scroll
+                  </motion.span>
+                </>
+              )}
+            </button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[400px] md:min-h-[500px]">
-              {/* Video Section */}
-              <div className="relative p-4 md:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-white">
-                {/* Video Container with Default Player */}
-                <VideoPlayer
-                  videoUrl={currentReview.videoUrl}
-                  thumbnail={currentReview.videoThumbnail}
-                />
-
-                {/* Client Info */}
-                <div className="mt-4 md:mt-6 text-center">
-                  <h3 className="text-lg font-anton md:text-xl font-bold text-gray-900">
-                    {currentReview.name}
-                  </h3>
-                  <p className="text-teal-600 font-poppins font-medium text-sm md:text-base">
-                    {currentReview.role}
-                  </p>
-                  <p className="text-gray-500 font-poppins text-xs md:text-sm">
-                    {currentReview.company}
-                  </p>
-                  <div className="mt-2 flex justify-center">
-                    <StarRating rating={currentReview.rating} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Review Text Section */}
-              <div className="p-4 md:p-6 lg:p-8 flex flex-col justify-center">
-                <div className="mb-4 font-poppins md:mb-6">
-                  <div className="text-teal-500 text-4xl md:text-6xl mb-2 md:mb-4">
-                    "
-                  </div>
-
-                  {/* Review Text */}
-                  <div className="h-32 md:h-48 overflow-y-auto">
-                    <p className="text-gray-700 text-sm md:text-lg leading-relaxed">
-                      {currentReview.review}
-                    </p>
-                  </div>
-
-                  {/* Stats Badge */}
-                  <div className="bg-teal-50 inline-flex items-center px-3 md:px-4 py-1 md:py-2 rounded-full mt-3 md:mt-4">
-                    <span className="text-teal-700 font-semibold text-xs md:text-sm">
-                      🎯 {currentReview.stats}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Navigation Dots and Counter - Only show if multiple reviews */}
-                {videoReviews.length > 1 && (
-                  <div className="flex items-center justify-between mt-4 md:mt-8">
-                    <div className="flex items-center space-x-2 md:space-x-3">
-                      {videoReviews.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentReviewIndex(index)}
-                          className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
-                            index === currentReviewIndex
-                              ? "bg-teal-500 scale-125"
-                              : "bg-gray-300 hover:bg-gray-400"
-                          }`}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="text-gray-500 text-xs md:text-sm">
-                      {currentReviewIndex + 1} of {videoReviews.length}
-                    </div>
-                  </div>
-                )}
-              </div>
+            <div className="flex items-center">
+              <motion.div
+                className={`w-3 h-3 rounded-full mr-2 ${
+                  isPaused || hoveredCardIndex !== null
+                    ? "bg-red-500"
+                    : "bg-green-500"
+                }`}
+                animate={{
+                  scale: isTransitioning ? [1, 1.2, 1] : 1,
+                }}
+                transition={{
+                  duration: 0.3,
+                  repeat: isTransitioning ? 1 : 0,
+                }}
+              />
+              <motion.span
+                className="text-sm text-gray-600"
+                key={
+                  isPaused || hoveredCardIndex !== null ? "paused" : "playing"
+                }
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isPaused || hoveredCardIndex !== null
+                  ? "Paused"
+                  : "Auto-scrolling"}
+              </motion.span>
             </div>
+          </div>
+
+          {/* Marquee Container */}
+          <div className="relative overflow-hidden rounded-xl">
+            {/* Gradient Fades */}
+            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white via-white/95 to-transparent z-10"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white via-white/95 to-transparent z-10"></div>
+
+            {/* Marquee with smooth pause */}
+            <motion.div
+              className="flex space-x-6 py-6 px-2"
+              animate={{
+                x:
+                  isPaused || hoveredCardIndex !== null
+                    ? [null, 0] // When paused, just stay at 0 without animation
+                    : [0, -1600], // When playing, animate from 0 to -1600
+              }}
+              transition={{
+                x: {
+                  repeat: isPaused || hoveredCardIndex !== null ? 0 : Infinity,
+                  repeatType: "loop",
+                  duration: 40,
+                  ease: "linear",
+                  type: "tween",
+                },
+              }}
+            >
+              {videoReviews.map((review, index) => (
+                <div
+                  key={`${review.id}-${index}`}
+                  onMouseEnter={() => handleCardHover(index)}
+                  onMouseLeave={handleCardLeave}
+                  className="flex-shrink-0 h-full"
+                >
+                  <CompactVideoCard review={review} index={index} />
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Instructions */}
+          <div className="mt-6 text-center">
+            <p className="text-gray-500 text-sm md:text-base">
+              Hover over any card to pause scrolling • Click play button to
+              watch video testimonials
+            </p>
           </div>
         </div>
       </div>
@@ -474,7 +583,6 @@ const MotionCredit = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Create particles - reduced count for mobile
     const particles = [];
     const particleCount = window.innerWidth < 768 ? 40 : 80;
 
@@ -518,11 +626,9 @@ const MotionCredit = () => {
         ctx.fillStyle = `rgba(20, 184, 166, ${particle.opacity})`;
         ctx.fill();
 
-        // Move particles
         particle.x += Math.cos(particle.direction) * particle.speed;
         particle.y += Math.sin(particle.direction) * particle.speed;
 
-        // Wrap around edges
         if (particle.x < 0) particle.x = canvas.width;
         if (particle.x > canvas.width) particle.x = 0;
         if (particle.y < 0) particle.y = canvas.height;
@@ -557,13 +663,199 @@ const MotionCredit = () => {
         },
       }}
     >
+      {/* Stats Grid */}
+      {!loading && (
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mt-12 md:mt-16"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.2,
+                delayChildren: 0.3,
+              },
+            },
+          }}
+        >
+          {/* Stat 1 - Videos Delivered */}
+          <motion.div
+            className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.6,
+                  ease: "easeOut",
+                },
+              },
+            }}
+            whileHover={{
+              y: window.innerWidth >= 768 ? -5 : 0,
+              borderColor: "rgba(20, 184, 166, 0.3)",
+              transition: { duration: 0.3 },
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-teal-600 mb-1 md:mb-2">
+                {getVideosValue()}
+              </div>
+              <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
+                Videos Delivered
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Stat 2 - Trusted Brands */}
+          <motion.div
+            className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-emerald-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.6,
+                  ease: "easeOut",
+                  delay: 0.1,
+                },
+              },
+            }}
+            whileHover={{
+              y: window.innerWidth >= 768 ? -5 : 0,
+              borderColor: "rgba(16, 185, 129, 0.3)",
+              transition: { duration: 0.3 },
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="text-3xl md:text-4xl font-anton lg:text-5xl font-bold text-emerald-600 mb-1 md:mb-2">
+                {getBrandsValue()}
+              </div>
+              <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
+                Trusted Brands
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Stat 3 - Years Experience */}
+          <motion.div
+            className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.6,
+                  ease: "easeOut",
+                  delay: 0.2,
+                },
+              },
+            }}
+            whileHover={{
+              y: window.innerWidth >= 768 ? -5 : 0,
+              borderColor: "rgba(34, 197, 94, 0.3)",
+              transition: { duration: 0.3 },
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-green-600 mb-1 md:mb-2">
+                {getYearsValue()}
+              </div>
+              <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
+                Years Experience
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+      {/* Scrolling Credibility Strip */}
+      {!loading && (
+        <div className="relative overflow-hidden py-6 md:py-8 border-y border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 backdrop-blur-sm">
+          {/* Glowing edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-white to-transparent z-10"></div>
+
+          <motion.div
+            className="flex whitespace-nowrap"
+            animate={{
+              x: [0, -800],
+            }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: window.innerWidth < 768 ? 25 : 35,
+                ease: "linear",
+              },
+            }}
+          >
+            {/* First set */}
+            <div className="flex font-allan items-center">
+              {scrollingItems.map((item, index) => (
+                <div
+                  key={`first-${item.id}`}
+                  className="mx-6 md:mx-10 flex items-center"
+                >
+                  <div
+                    className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${
+                      index === 0
+                        ? "bg-teal-500 shadow-lg shadow-teal-500/30"
+                        : index === 1
+                        ? "bg-emerald-500 shadow-lg shadow-emerald-500/30"
+                        : "bg-green-500 shadow-lg shadow-green-500/30"
+                    } mr-3 md:mr-4`}
+                  ></div>
+                  <span className="text-gray-700 text-sm md:text-lg lg:text-xl font-medium tracking-wide">
+                    <span className="text-teal-600 font-bold">
+                      {item.value}
+                    </span>{" "}
+                    {item.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Duplicate set for seamless looping */}
+            <div className="flex font-allan items-center">
+              {scrollingItems.map((item, index) => (
+                <div
+                  key={`second-${item.id}`}
+                  className="mx-6 md:mx-10 flex items-center"
+                >
+                  <div
+                    className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${
+                      index === 0
+                        ? "bg-teal-500 shadow-lg shadow-teal-500/30"
+                        : index === 1
+                        ? "bg-emerald-500 shadow-lg shadow-emerald-500/30"
+                        : "bg-green-500 shadow-lg shadow-green-500/30"
+                    } mr-3 md:mr-4`}
+                  ></div>
+                  <span className="text-gray-700 text-sm md:text-lg lg:text-xl font-medium tracking-wide">
+                    <span className="text-teal-600 font-bold">
+                      {item.value}
+                    </span>{" "}
+                    {item.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
       {/* Animated particle background */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full opacity-30 md:opacity-50"
+        className="absolute inset-0 w-full h-full opacity-30 md:opacity-50 "
       />
 
-      {/* Glowing orbs with light colors - Reduced size for mobile */}
+      {/* Glowing orbs with light colors */}
       <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-teal-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"></div>
       <div
         className="absolute bottom-1/3 right-1/3 w-40 h-40 md:w-80 md:h-80 bg-emerald-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"
@@ -578,7 +870,7 @@ const MotionCredit = () => {
       <div className="absolute inset-0 shadow-[inset_0_0_50px_10px_rgba(255,255,255,0.5)] md:shadow-[inset_0_0_100px_20px_rgba(255,255,255,0.5)]"></div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 mt-20 lg:px-6">
         <SectionHeader
           subtitle="What Our Clients Say"
           title="Trusted by Creators"
@@ -593,7 +885,7 @@ const MotionCredit = () => {
           dotColor="teal-500"
         />
 
-        {/* Video Reviews Section */}
+        {/* Marquee Video Reviews Section */}
         <VideoReviewSection />
 
         {/* Loading State for Statistics */}
@@ -616,194 +908,6 @@ const MotionCredit = () => {
             <p className="text-amber-600 text-sm md:text-base">{error}</p>
           </div>
         )}
-
-        {/* Scrolling Credibility Strip */}
-        {!loading && (
-          <div className="relative overflow-hidden py-6 md:py-8 border-y border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 backdrop-blur-sm">
-            {/* Glowing edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-white to-transparent z-10"></div>
-
-            <motion.div
-              className="flex whitespace-nowrap"
-              animate={{
-                x: [0, -800],
-              }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: window.innerWidth < 768 ? 25 : 35,
-                  ease: "linear",
-                },
-              }}
-            >
-              {/* First set */}
-              <div className="flex font-allan items-center">
-                {scrollingItems.map((item, index) => (
-                  <div
-                    key={`first-${item.id}`}
-                    className="mx-6 md:mx-10 flex items-center"
-                  >
-                    <div
-                      className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${
-                        index === 0
-                          ? "bg-teal-500 shadow-lg shadow-teal-500/30"
-                          : index === 1
-                          ? "bg-emerald-500 shadow-lg shadow-emerald-500/30"
-                          : "bg-green-500 shadow-lg shadow-green-500/30"
-                      } mr-3 md:mr-4`}
-                    ></div>
-                    <span className="text-gray-700 text-sm md:text-lg lg:text-xl font-medium tracking-wide">
-                      <span className="text-teal-600 font-bold">
-                        {item.value}
-                      </span>{" "}
-                      {item.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Duplicate set for seamless looping */}
-              <div className="flex font-allan items-center">
-                {scrollingItems.map((item, index) => (
-                  <div
-                    key={`second-${item.id}`}
-                    className="mx-6 md:mx-10 flex items-center"
-                  >
-                    <div
-                      className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${
-                        index === 0
-                          ? "bg-teal-500 shadow-lg shadow-teal-500/30"
-                          : index === 1
-                          ? "bg-emerald-500 shadow-lg shadow-emerald-500/30"
-                          : "bg-green-500 shadow-lg shadow-green-500/30"
-                      } mr-3 md:mr-4`}
-                    ></div>
-                    <span className="text-gray-700 text-sm md:text-lg lg:text-xl font-medium tracking-wide">
-                      <span className="text-teal-600 font-bold">
-                        {item.value}
-                      </span>{" "}
-                      {item.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {/* Stats Grid */}
-        {!loading && (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mt-12 md:mt-16"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.2,
-                  delayChildren: 0.3,
-                },
-              },
-            }}
-          >
-            {/* Stat 1 - Videos Delivered */}
-            <motion.div
-              className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    duration: 0.6,
-                    ease: "easeOut",
-                  },
-                },
-              }}
-              whileHover={{
-                y: window.innerWidth >= 768 ? -5 : 0,
-                borderColor: "rgba(20, 184, 166, 0.3)",
-                transition: { duration: 0.3 },
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-teal-600 mb-1 md:mb-2">
-                  {getVideosValue()}
-                </div>
-                <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
-                  Videos Delivered
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Stat 2 - Trusted Brands */}
-            <motion.div
-              className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-emerald-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    duration: 0.6,
-                    ease: "easeOut",
-                    delay: 0.1,
-                  },
-                },
-              }}
-              whileHover={{
-                y: window.innerWidth >= 768 ? -5 : 0,
-                borderColor: "rgba(16, 185, 129, 0.3)",
-                transition: { duration: 0.3 },
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="text-3xl md:text-4xl font-anton lg:text-5xl font-bold text-emerald-600 mb-1 md:mb-2">
-                  {getBrandsValue()}
-                </div>
-                <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
-                  Trusted Brands
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Stat 3 - Years Experience */}
-            <motion.div
-              className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    duration: 0.6,
-                    ease: "easeOut",
-                    delay: 0.2,
-                  },
-                },
-              }}
-              whileHover={{
-                y: window.innerWidth >= 768 ? -5 : 0,
-                borderColor: "rgba(34, 197, 94, 0.3)",
-                transition: { duration: 0.3 },
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-green-600 mb-1 md:mb-2">
-                  {getYearsValue()}
-                </div>
-                <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
-                  Years Experience
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
       </div>
 
       <style jsx>{`
@@ -818,6 +922,12 @@ const MotionCredit = () => {
         }
         .animate-pulse-slow {
           animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .line-clamp-4 {
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
     </motion.section>
