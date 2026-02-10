@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getVideoReelsByCategory } from "../../services/api";
 import BookingModal from "../BookingModal";
@@ -74,10 +80,11 @@ const BackgroundLogoAnimation = () => {
       {Array.from({ length: 10 }).map((_, i) => (
         <motion.div
           key={`particle-${i}`}
-          className="absolute w-1 h-1 bg-gradient-to-r from-teal-400/50 to-teal-300/30 rounded-full z-5"
+          className="absolute w-1 h-1 bg-gradient-to-r from-teal-400/50 to-teal-300/30 rounded-full"
           style={{
             left: `${8 + i * 8}%`,
             top: `${12 + i * 8}%`,
+            zIndex: 5,
           }}
           animate={{
             y: [0, -15, 0, -10, 0],
@@ -115,9 +122,9 @@ const BackgroundLogoAnimation = () => {
 
 // Floating App Logos Component
 const FloatingAppLogos = ({ videoTools }) => {
-  // Generate random positions for floating logos
-  const getRandomPosition = (index) => {
-    const positions = [
+  // Memoize positions array
+  const positions = useMemo(
+    () => [
       { top: "15%", left: "8%", scale: 0.6 },
       { top: "22%", right: "12%", scale: 0.8 },
       { top: "65%", left: "6%", scale: 0.7 },
@@ -126,9 +133,16 @@ const FloatingAppLogos = ({ videoTools }) => {
       { bottom: "32%", left: "20%", scale: 0.9 },
       { top: "12%", right: "25%", scale: 1.1 },
       { bottom: "16%", right: "32%", scale: 0.4 },
-    ];
-    return positions[index % positions.length];
-  };
+    ],
+    []
+  );
+
+  const getRandomPosition = useCallback(
+    (index) => {
+      return positions[index % positions.length];
+    },
+    [positions]
+  );
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-25">
@@ -278,89 +292,50 @@ const FloatingAppLogos = ({ videoTools }) => {
   );
 };
 
-const HeroSection = () => {
-  const videoRef = useRef(null);
+// Custom hook for video autoplay logic
+const useVideoAutoplay = (videoRef, loadingIntroduction) => {
   const [videoPlaying, setVideoPlaying] = useState(false);
-  const [loadingIntroduction, setLoadingIntroduction] = useState(true);
-  const [introductionVideo, setIntroductionVideo] = useState(null);
   const [showPlayButton, setShowPlayButton] = useState(true);
   const [autoplayAttempted, setAutoplayAttempted] = useState(false);
 
-  // Booking modal state
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const attemptAutoplay = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video || autoplayAttempted) return;
 
-  // Video editing tools data
-  const videoTools = [
-    { name: "DaVinci Resolve", logo: davinchi },
-    { name: "Premier Pro", logo: premier },
-    { name: "Final Cut Pro", logo: final_cut },
-    { name: "CapCut", logo: cap_cut },
-    { name: "After Effects", logo: after_effect },
-    { name: "Blender", logo: blender },
-  ];
+    setAutoplayAttempted(true);
 
-  // Marquee content
-  const marqueeItems = [
-    "4K RESOLUTION",
-    "COLOR GRADING",
-    "MOTION GRAPHICS",
-    "VISUAL EFFECTS",
-    "SOUND DESIGN",
-    "AI ENHANCEMENT",
-    "DRONE FOOTAGE",
-    "CINEMATIC EDITING",
-    "3D ANIMATION",
-    "VR CONTENT",
-  ];
+    try {
+      // Try to play with sound
+      await video.play();
+      setVideoPlaying(true);
+      setShowPlayButton(false);
+      console.log("Autoplay with sound successful!");
+    } catch (error) {
+      console.log("Autoplay with sound blocked by browser:", error);
 
-  // Fetch introduction video
-  useEffect(() => {
-    const fetchIntroductionVideo = async () => {
+      // Fallback: Try muted autoplay first, then unmute
       try {
-        setLoadingIntroduction(true);
-        const response = await getVideoReelsByCategory("introduction");
+        video.muted = true;
+        await video.play();
+        setVideoPlaying(true);
+        setShowPlayButton(false);
 
-        if (
-          response.status === "success" &&
-          response.data.videoReels.length > 0
-        ) {
-          const introVideo = response.data.videoReels[0];
-          setIntroductionVideo(introVideo);
-        } else {
-          console.warn("No introduction videos found");
-        }
-      } catch (error) {
-        console.error("Error fetching introduction video:", error);
-      } finally {
-        setLoadingIntroduction(false);
+        // Try to unmute after a short delay
+        setTimeout(() => {
+          if (video) {
+            video.muted = false;
+          }
+        }, 1000);
+
+        console.log("Autoplay with muted start successful");
+      } catch (mutedError) {
+        console.log("Muted autoplay also blocked:", mutedError);
+        setShowPlayButton(true);
       }
-    };
+    }
+  }, [videoRef, autoplayAttempted]);
 
-    fetchIntroductionVideo();
-  }, []);
-
-  // Attempt autoplay when component mounts and user has interacted with page
-  useEffect(() => {
-    // Add a global click handler to detect user interaction
-    const handleUserInteraction = () => {
-      if (videoRef.current && !autoplayAttempted && !loadingIntroduction) {
-        attemptAutoplay();
-      }
-    };
-
-    // Listen for user interaction on the whole document
-    document.addEventListener("click", handleUserInteraction);
-    document.addEventListener("touchstart", handleUserInteraction);
-    document.addEventListener("keydown", handleUserInteraction);
-
-    return () => {
-      document.removeEventListener("click", handleUserInteraction);
-      document.removeEventListener("touchstart", handleUserInteraction);
-      document.removeEventListener("keydown", handleUserInteraction);
-    };
-  }, [autoplayAttempted, loadingIntroduction]);
-
-  // Video event handlers and autoplay logic
+  // Handle video events
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -380,76 +355,185 @@ const HeroSection = () => {
       setShowPlayButton(true);
     };
 
-    const handleLoadedData = () => {
-      // Try to autoplay when video is loaded
-      if (!autoplayAttempted) {
-        attemptAutoplay();
-      }
-    };
-
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("ended", handleEnded);
-    video.addEventListener("loadeddata", handleLoadedData);
 
     return () => {
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("ended", handleEnded);
-      video.removeEventListener("loadeddata", handleLoadedData);
     };
-  }, [autoplayAttempted]);
+  }, [videoRef]);
 
-  const attemptAutoplay = async () => {
-    const video = videoRef.current;
-    if (!video || autoplayAttempted) return;
-
-    setAutoplayAttempted(true);
-
-    try {
-      // Try to play with sound
-      await video.play();
-
-      // If successful, update state
-      setVideoPlaying(true);
-      setShowPlayButton(false);
-      console.log("Autoplay with sound successful!");
-    } catch (error) {
-      console.log("Autoplay with sound blocked by browser:", error);
-
-      // Fallback 1: Try muted autoplay first, then unmute
-      try {
-        video.muted = true;
-        await video.play();
-        setVideoPlaying(true);
-        setShowPlayButton(false);
-
-        // Try to unmute after a short delay
-        setTimeout(() => {
-          video.muted = false;
-        }, 1000);
-
-        console.log("Autoplay with muted start successful");
-      } catch (mutedError) {
-        console.log("Muted autoplay also blocked:", mutedError);
-        setShowPlayButton(true);
-      }
-    }
-  };
-
-  // Trigger autoplay when video source changes
+  // Setup autoplay and user interaction listeners
   useEffect(() => {
-    if (!loadingIntroduction && videoRef.current && !autoplayAttempted) {
-      // Wait a bit for the DOM to be ready and try autoplay
-      const timer = setTimeout(() => {
-        attemptAutoplay();
-      }, 1000);
+    const video = videoRef.current;
+    if (!video || loadingIntroduction || autoplayAttempted) return;
 
-      return () => clearTimeout(timer);
-    }
-  }, [loadingIntroduction, autoplayAttempted]);
+    let cleanupFunctions = [];
 
-  const handlePlayPause = () => {
+    const handleUserInteraction = () => {
+      attemptAutoplay();
+    };
+
+    const handleLoadedData = () => {
+      attemptAutoplay();
+    };
+
+    // Add event listeners
+    video.addEventListener("loadeddata", handleLoadedData);
+    document.addEventListener("click", handleUserInteraction);
+    document.addEventListener("touchstart", handleUserInteraction);
+
+    // Initial attempt after 1 second
+    const timer = setTimeout(() => {
+      attemptAutoplay();
+    }, 1000);
+
+    // Cleanup function
+    return () => {
+      video.removeEventListener("loadeddata", handleLoadedData);
+      document.removeEventListener("click", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
+      clearTimeout(timer);
+    };
+  }, [videoRef, loadingIntroduction, autoplayAttempted, attemptAutoplay]);
+
+  return {
+    videoPlaying,
+    showPlayButton,
+    autoplayAttempted,
+    setVideoPlaying,
+    setShowPlayButton,
+    attemptAutoplay,
+  };
+};
+
+const HeroSection = () => {
+  const videoRef = useRef(null);
+  const [loadingIntroduction, setLoadingIntroduction] = useState(true);
+  const [introductionVideo, setIntroductionVideo] = useState(null);
+  const [videoError, setVideoError] = useState(false);
+  const [hasVideoData, setHasVideoData] = useState(false);
+
+  // Booking modal state
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
+  // Use custom hook for video autoplay
+  const {
+    videoPlaying,
+    showPlayButton,
+    attemptAutoplay,
+    setVideoPlaying,
+    setShowPlayButton,
+  } = useVideoAutoplay(videoRef, loadingIntroduction);
+
+  // Video editing tools data
+  const videoTools = useMemo(
+    () => [
+      { name: "DaVinci Resolve", logo: davinchi },
+      { name: "Premier Pro", logo: premier },
+      { name: "Final Cut Pro", logo: final_cut },
+      { name: "CapCut", logo: cap_cut },
+      { name: "After Effects", logo: after_effect },
+      { name: "Blender", logo: blender },
+    ],
+    []
+  );
+
+  // Marquee content
+  const marqueeItems = useMemo(
+    () => [
+      "4K RESOLUTION",
+      "COLOR GRADING",
+      "MOTION GRAPHICS",
+      "VISUAL EFFECTS",
+      "SOUND DESIGN",
+      "AI ENHANCEMENT",
+      "DRONE FOOTAGE",
+      "CINEMATIC EDITING",
+      "3D ANIMATION",
+      "VR CONTENT",
+    ],
+    []
+  );
+
+  // Fallback video URLs - use a dummy video or placeholder
+  const fallbackVideos = useMemo(
+    () => [
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    ],
+    []
+  );
+
+  const fallbackPosters = useMemo(
+    () => [
+      "https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1536240478700-b869070f9279?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+    ],
+    []
+  );
+
+  // Fetch introduction video
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchIntroductionVideo = async () => {
+      try {
+        setLoadingIntroduction(true);
+        setVideoError(false);
+
+        const response = await getVideoReelsByCategory("introduction");
+
+        if (
+          isMounted &&
+          response.status === "success" &&
+          response.data?.videoReels?.length > 0
+        ) {
+          const introVideo = response.data.videoReels[0];
+
+          // Verify video has required properties
+          if (introVideo?.videoUrl) {
+            setIntroductionVideo(introVideo);
+            setHasVideoData(true);
+            setVideoError(false);
+          } else {
+            console.warn("Video data incomplete, using fallback");
+            setHasVideoData(false);
+            setVideoError(true);
+          }
+        } else {
+          console.warn("No introduction videos found, using fallback");
+          if (isMounted) {
+            setHasVideoData(false);
+            setVideoError(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching introduction video:", error);
+        if (isMounted) {
+          setHasVideoData(false);
+          setVideoError(true);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingIntroduction(false);
+        }
+      }
+    };
+
+    fetchIntroductionVideo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handlePlayPause = useCallback(() => {
     if (videoRef.current) {
       if (videoRef.current.paused || videoRef.current.ended) {
         videoRef.current
@@ -460,6 +544,7 @@ const HeroSection = () => {
           })
           .catch((error) => {
             console.log("Manual play failed:", error);
+            setShowPlayButton(true);
           });
       } else {
         videoRef.current.pause();
@@ -467,50 +552,64 @@ const HeroSection = () => {
         setShowPlayButton(true);
       }
     }
-  };
+  }, [setVideoPlaying, setShowPlayButton]);
 
   // Modal handlers
-  const openBookingModal = () => setIsBookingModalOpen(true);
-  const closeBookingModal = () => setIsBookingModalOpen(false);
-  const navigateToProjects = () => {
+  const openBookingModal = useCallback(() => setIsBookingModalOpen(true), []);
+  const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), []);
+  const navigateToProjects = useCallback(() => {
     window.location.href = "/projects";
-  };
+  }, []);
+
+  // Determine video source and poster - with better fallback logic
+  const { videoSource, videoPoster, videoTitle } = useMemo(() => {
+    if (hasVideoData && introductionVideo?.videoUrl) {
+      return {
+        videoSource: introductionVideo.videoUrl,
+        videoPoster: introductionVideo.thumbnailUrl || fallbackPosters[0],
+        videoTitle: `${introductionVideo.title || "INTRODUCTION"}.MP4`,
+      };
+    } else {
+      // Use fallback video
+      const randomIndex = Math.floor(Math.random() * fallbackVideos.length);
+      return {
+        videoSource: fallbackVideos[randomIndex],
+        videoPoster: fallbackPosters[randomIndex],
+        videoTitle: "DEMO_SHOWCASE.MP4",
+      };
+    }
+  }, [hasVideoData, introductionVideo, fallbackVideos, fallbackPosters]);
 
   // Text animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.4,
-        ease: [0.25, 0.1, 0.25, 1],
+  const containerVariants = useMemo(
+    () => ({
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.15,
+          delayChildren: 0.4,
+          ease: [0.25, 0.1, 0.25, 1],
+        },
       },
-    },
-  };
+    }),
+    []
+  );
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: [0.25, 0.1, 0.25, 1],
+  const itemVariants = useMemo(
+    () => ({
+      hidden: { y: 20, opacity: 0 },
+      visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+          duration: 0.8,
+          ease: [0.25, 0.1, 0.25, 1],
+        },
       },
-    },
-  };
-
-  // Determine video source and poster
-  const videoSource =
-    introductionVideo?.videoUrl ||
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-  const videoPoster =
-    introductionVideo?.thumbnailUrl ||
-    "https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
-  const videoTitle = introductionVideo?.title
-    ? `${introductionVideo.title}.MP4`
-    : "INTRODUCTION_2025.MP4";
+    }),
+    []
+  );
 
   return (
     <motion.div
@@ -526,7 +625,6 @@ const HeroSection = () => {
       <FloatingAppLogos videoTools={videoTools} />
 
       {/* Content Section */}
-
       <SectionHeader
         subtitle="Next Generation Video Editing"
         title="Visual Stories"
@@ -539,7 +637,7 @@ const HeroSection = () => {
         highlightWeight=""
       />
 
-      {/* Video Player Section - Simplified with default controls */}
+      {/* Video Player Section */}
       <motion.div
         className="relative z-30 w-full max-w-4xl px-4 mb-4"
         initial={{ opacity: 0, y: 25 }}
@@ -559,7 +657,9 @@ const HeroSection = () => {
               <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm"></div>
             </div>
             <p className="text-gray-800 font-poppins font-semibold text-sm">
-              Experience Our Creative Process
+              {hasVideoData
+                ? "Experience Our Creative Process"
+                : "Demo Showcase - Sample Content"}
             </p>
           </div>
         </motion.div>
@@ -583,6 +683,48 @@ const HeroSection = () => {
                 </p>
               </div>
             </div>
+          ) : !hasVideoData ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-amber-50 rounded-xl flex flex-col items-center justify-center z-30 p-6">
+              <div className="flex flex-col items-center text-center max-w-md">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                  <svg
+                    className="w-8 h-8 text-amber-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-amber-800 font-semibold text-lg mb-2">
+                  Showcase Video Coming Soon
+                </h3>
+                <p className="text-amber-700 text-sm mb-4">
+                  Our portfolio showcase is being prepared. In the meantime,
+                  enjoy this demo video that demonstrates the quality of our
+                  video editing capabilities.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={openBookingModal}
+                    className="px-4 py-2 bg-teal-500 text-white rounded-lg text-sm hover:bg-teal-600 transition-colors"
+                  >
+                    Book a Consultation
+                  </button>
+                  <button
+                    onClick={navigateToProjects}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm hover:bg-gray-300 transition-colors"
+                  >
+                    View Projects
+                  </button>
+                </div>
+              </div>
+            </div>
           ) : (
             <>
               {/* HTML5 Video Player with sound */}
@@ -595,47 +737,26 @@ const HeroSection = () => {
                 playsInline
                 preload="auto"
                 loop
+                muted={!videoPlaying}
+                onError={() => {
+                  console.error("Video playback error");
+                  setVideoError(true);
+                }}
               >
                 <source src={videoSource} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
-              {/* File Name Display */}
-              <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-lg text-xs font-semibold z-20 shadow-md border border-gray-200">
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full shadow-sm ${
-                      videoPlaying
-                        ? "bg-green-500 animate-pulse"
-                        : "bg-yellow-500"
-                    }`}
-                  ></div>
-                  <span className="text-gray-800">▶ {videoTitle}</span>
-                  {videoPlaying && (
-                    <motion.div
-                      className="flex items-center gap-1 ml-2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <svg
-                        className="w-3 h-3 text-teal-600"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </motion.div>
-                  )}
+              {/* Video Info Banner */}
+              <div className="absolute top-4 left-4 z-10">
+                <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-md">
+                  {videoTitle}
                 </div>
               </div>
 
               {/* Simple Play Button Overlay - Only shown if video is not playing */}
               <AnimatePresence>
-                {showPlayButton && (
+                {showPlayButton && !loadingIntroduction && (
                   <motion.div
                     className="absolute inset-0 flex items-center justify-center z-20 cursor-pointer bg-black/10 backdrop-blur-sm"
                     initial={{ opacity: 0 }}
@@ -686,6 +807,27 @@ const HeroSection = () => {
           )}
         </motion.div>
       </motion.div>
+
+      {/* Status indicator */}
+      {!loadingIntroduction && (
+        <motion.div
+          className="text-center mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+        >
+          <div className="inline-flex items-center gap-2 text-xs">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                hasVideoData ? "bg-green-500" : "bg-amber-500"
+              }`}
+            ></div>
+            <span className="text-gray-600">
+              {hasVideoData ? "Live portfolio video" : "Demo video playing"}
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Scrolling Marquee */}
       <motion.div
