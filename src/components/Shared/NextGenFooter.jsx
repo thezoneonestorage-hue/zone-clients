@@ -13,6 +13,7 @@ import {
   FaShieldAlt,
   FaHeart,
   FaCode,
+  FaArrowUp,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/Zone-logo.svg";
@@ -26,6 +27,7 @@ const NextGenFooter = () => {
   const [showMotivationalModal, setShowMotivationalModal] = useState(false);
   const [motivationalQuote, setMotivationalQuote] = useState("");
   const [redirectCountdown, setRedirectCountdown] = useState(3);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   // Secret admin riddle (answer from environment variable)
   const secretRiddle = {
@@ -245,6 +247,31 @@ const NextGenFooter = () => {
     ],
   };
 
+  // Add scroll listener to show/hide back to top button
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show button when page is scrolled down 300px from top
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Clean up
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to top function with smooth behavior
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   // Countdown effect for redirect
   useEffect(() => {
     let countdownInterval;
@@ -309,8 +336,335 @@ const NextGenFooter = () => {
     window.location.href = `/login/${secretAnswer}`;
   };
 
+  // Animation 1: Floating Bubble Effect
+  const bubbleAnimation = {
+    initial: {
+      opacity: 0,
+      scale: 0.2,
+      y: 100,
+      filter: "blur(10px)",
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 200,
+        mass: 0.8,
+        duration: 0.8,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.2,
+      y: 100,
+      filter: "blur(10px)",
+      transition: {
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    },
+  };
+
+  // Animation 2: Rotating Bloom Effect
+  const bloomAnimation = {
+    initial: {
+      opacity: 0,
+      scale: 0,
+      rotate: -180,
+      borderRadius: "50%",
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      borderRadius: "9999px",
+      transition: {
+        type: "spring",
+        damping: 15,
+        stiffness: 150,
+        mass: 1,
+        duration: 1,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0,
+      rotate: 180,
+      borderRadius: "50%",
+      transition: {
+        duration: 0.6,
+        ease: "anticipate",
+      },
+    },
+  };
+
+  // Animation 3: Ripple Wave Effect (using this one)
+  const rippleAnimation = {
+    initial: {
+      opacity: 0,
+      scale: 0.3,
+      x: 50,
+      y: 50,
+      rotate: 45,
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      y: 0,
+      rotate: 0,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 180,
+        mass: 0.9,
+        duration: 0.7,
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.3,
+      x: -50,
+      y: 50,
+      rotate: -45,
+      transition: {
+        duration: 0.5,
+        ease: "easeIn",
+      },
+    },
+    hover: {
+      scale: 1.1,
+      rotate: 5,
+      boxShadow:
+        "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
+      transition: {
+        type: "spring",
+        damping: 15,
+        stiffness: 300,
+      },
+    },
+    tap: {
+      scale: 0.95,
+      rotate: -2,
+      transition: {
+        type: "spring",
+        damping: 10,
+        stiffness: 400,
+      },
+    },
+  };
+
+  // Animation 4: Magnetic Pull Effect
+  const magneticAnimation = {
+    initial: {
+      opacity: 0,
+      scale: 0.5,
+      x: 100,
+      rotate: 360,
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      rotate: 0,
+      transition: {
+        type: "spring",
+        damping: 30,
+        stiffness: 120,
+        mass: 1.2,
+        duration: 0.9,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.5,
+      x: -100,
+      rotate: -360,
+      transition: {
+        duration: 0.5,
+        ease: "backIn",
+      },
+    },
+  };
+
+  // Animation 5: Elastic Stretch Effect
+  const elasticAnimation = {
+    initial: {
+      opacity: 0,
+      scaleX: 0,
+      scaleY: 0.2,
+      y: 50,
+    },
+    animate: {
+      opacity: 1,
+      scaleX: 1,
+      scaleY: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 150,
+        mass: 0.7,
+        duration: 0.8,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scaleX: 0,
+      scaleY: 0.2,
+      y: 50,
+      transition: {
+        duration: 0.4,
+        ease: "easeIn",
+      },
+    },
+  };
+
+  // Choose your favorite animation (currently using rippleAnimation)
+  const selectedAnimation = rippleAnimation;
+
+  // Particle effect for button
+  const particleVariants = {
+    initial: { scale: 0, opacity: 0 },
+    animate: (i) => ({
+      scale: [0, 1, 0],
+      opacity: [0, 1, 0],
+      x: [0, i % 2 === 0 ? 20 : -20],
+      y: [0, -30],
+      transition: {
+        duration: 1.2,
+        repeat: Infinity,
+        delay: i * 0.2,
+        ease: "easeOut",
+      },
+    }),
+  };
+
   return (
     <footer className="relative font-poppins bg-white border-t border-gray-200/50">
+      {/* Back to Top Button - Smooth Ripple Animation */}
+      <AnimatePresence mode="wait">
+        {showBackToTop && (
+          <motion.button
+            key="back-to-top"
+            variants={selectedAnimation}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            whileHover="hover"
+            whileTap="tap"
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 z-[9999] bg-gradient-to-r from-teal-500 to-emerald-500 text-white p-5 rounded-full shadow-xl hover:shadow-2xl transition-shadow duration-300 group"
+            aria-label="Back to top"
+          >
+            {/* Floating particles around button */}
+            {[...Array(4)].map((_, i) => (
+              <motion.div
+                key={i}
+                custom={i}
+                variants={particleVariants}
+                initial="initial"
+                animate="animate"
+                className="absolute w-1 h-1 bg-white rounded-full"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                }}
+              />
+            ))}
+
+            {/* Gradient glow effect */}
+            <motion.div
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 opacity-0 group-hover:opacity-100"
+              animate={{
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Arrow icon with smooth floating animation */}
+            <motion.div
+              animate={{
+                y: [0, -4, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="relative z-10"
+            >
+              <FaArrowUp className="text-xl" />
+            </motion.div>
+
+            {/* Tooltip with smooth slide */}
+            <motion.span
+              initial={{ opacity: 0, x: -10, scale: 0.9 }}
+              whileHover={{ opacity: 1, x: -5, scale: 1 }}
+              transition={{
+                type: "spring",
+                damping: 15,
+                stiffness: 300,
+              }}
+              className="absolute right-full mr-3 px-3 py-1.5 bg-gray-800 text-white text-sm rounded-lg whitespace-nowrap pointer-events-none shadow-lg"
+            >
+              <span className="relative">
+                Back to Top
+                <motion.span
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="inline-block ml-1"
+                >
+                  ↑
+                </motion.span>
+              </span>
+              <span className="absolute top-1/2 -right-1 transform -translate-y-1/2 border-4 border-transparent border-l-gray-800" />
+            </motion.span>
+
+            {/* Ripple rings */}
+            <motion.span
+              className="absolute inset-0 rounded-full bg-white/30"
+              animate={{
+                scale: [1, 1.8, 1],
+                opacity: [0.3, 0, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+              }}
+            />
+            <motion.span
+              className="absolute inset-0 rounded-full bg-white/20"
+              animate={{
+                scale: [1, 2.2, 1],
+                opacity: [0.2, 0, 0.2],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: 0.3,
+              }}
+            />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Riddle Section */}
       <AnimatePresence>
         {showRiddles && (
@@ -582,7 +936,7 @@ const NextGenFooter = () => {
               <img
                 src={footerData.logo.src}
                 alt={footerData.logo.alt}
-                className="h-8 object-contain" // Adjust height as needed
+                className="h-8 object-contain"
               />
             </div>
           </motion.div>

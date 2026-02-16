@@ -1458,52 +1458,6 @@ const Projects = () => {
                 })}
           </motion.div>
         )}
-
-        {/* Stats */}
-        <motion.div
-          className="mt-20 pt-8 border-t border-gray-200"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-        >
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {[
-              { label: "Total Projects", value: projects.length },
-              { label: "Categories", value: categories.length - 1 },
-              { label: "Tools Used", value: videoTools.length },
-              { label: "Editing Apps", value: 5 },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className="text-center"
-                variants={fadeInUp}
-                custom={index}
-              >
-                <motion.div
-                  className="text-3xl font-anton font-bold text-teal-600 mb-2"
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20,
-                    delay: 0.8 + index * 0.1,
-                  }}
-                >
-                  {stat.value}+
-                </motion.div>
-                <div className="text-sm text-gray-600 font-poppins">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
       </div>
 
       {/* Video Modal with react-modal */}
@@ -1571,24 +1525,6 @@ const Projects = () => {
           </div>
         </motion.div>
       </Modal>
-
-      {/* Floating CTA */}
-      <motion.div
-        className="fixed bottom-8 right-8 z-40"
-        initial={{ opacity: 0, scale: 0.5, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 1.2, type: "spring", stiffness: 400, damping: 25 }}
-      >
-        <motion.button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="p-3 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-300"
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        >
-          <FiFilm className="w-6 h-6 text-white" />
-        </motion.button>
-      </motion.div>
     </section>
   );
 };
