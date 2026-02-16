@@ -11,6 +11,8 @@ import {
   FaTrophy,
   FaLightbulb,
   FaShieldAlt,
+  FaHeart,
+  FaCode,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/Zone-logo.svg";
@@ -625,22 +627,42 @@ const NextGenFooter = () => {
 
         {/* Bottom copyright */}
         <motion.div
-          className="mt-12 pt-6 border-t border-gray-200/50 text-center"
+          className="mt-12 pt-6 border-t border-gray-200/50"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Zone Studio. All rights reserved.
-          </p>
+          {/* Creator Credit */}
+          <div className="text-center mb-4">
+            <p className="text-gray-500 text-sm">
+              Designed and Developed by
+              <span>
+                <FaCode className="inline-block mx-1 text-teal-500" />
+              </span>
+              <a
+                href="https://mahim-protfolio.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-teal-600 hover:text-teal-700 font-medium transition-colors duration-300 hover:underline"
+              >
+                Mahim Shahriar
+              </a>
+            </p>
+          </div>
 
-          <div className="flex justify-center items-center mt-2 space-x-4 text-xs text-gray-500">
-            <span>Powered by Renderloop</span>
-            <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-            <span>4K & 8K Support</span>
-            <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-            <span>Global Delivery</span>
+          <div className="text-center">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} Zone Studio. All rights reserved.
+            </p>
+
+            <div className="flex justify-center items-center mt-2 space-x-4 text-xs text-gray-500">
+              <span>Powered by Renderloop</span>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <span>4K & 8K Support</span>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <span>Global Delivery</span>
+            </div>
           </div>
         </motion.div>
       </div>

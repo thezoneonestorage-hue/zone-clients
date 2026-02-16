@@ -3,6 +3,125 @@ import { motion, useInView, useAnimation } from "framer-motion";
 import { getActiveStatistics, getVideoReviews } from "../../services/api";
 import SectionHeader from "../Shared/SectionHeader";
 
+// Skeleton Components
+const StatisticsSkeleton = () => (
+  <div className="relative overflow-hidden py-6 md:py-8 border-y border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 backdrop-blur-sm">
+    <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10"></div>
+    <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-white to-transparent z-10"></div>
+
+    <div className="flex whitespace-nowrap animate-pulse">
+      <div className="flex font-allan items-center">
+        {[1, 2, 3].map((item, index) => (
+          <div
+            key={`skeleton-${index}`}
+            className="mx-6 md:mx-10 flex items-center"
+          >
+            <div
+              className={`w-2 h-2 md:w-3 md:h-3 rounded-full bg-gray-300 mr-3 md:mr-4`}
+            ></div>
+            <div className="h-6 md:h-8 w-32 md:w-40 bg-gray-300 rounded"></div>
+          </div>
+        ))}
+      </div>
+      <div className="flex font-allan items-center">
+        {[1, 2, 3].map((item, index) => (
+          <div
+            key={`skeleton-duplicate-${index}`}
+            className="mx-6 md:mx-10 flex items-center"
+          >
+            <div
+              className={`w-2 h-2 md:w-3 md:h-3 rounded-full bg-gray-300 mr-3 md:mr-4`}
+            ></div>
+            <div className="h-6 md:h-8 w-32 md:w-40 bg-gray-300 rounded"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const VideoCardSkeleton = () => (
+  <div className="relative group w-[320px] flex-shrink-0">
+    <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden h-full flex flex-col">
+      <div className="p-4 flex-grow flex flex-col">
+        {/* Video Section Skeleton */}
+        <div className="relative rounded-lg overflow-hidden mb-4 bg-gradient-to-br from-teal-50 to-emerald-50 flex-shrink-0 h-44 animate-pulse">
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <div className="w-14 h-14 bg-gray-300 rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Description Section Skeleton */}
+        <div className="mb-3 flex-shrink-0">
+          <div className="inline-flex items-center mb-2">
+            <div className="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        {/* Review Text Skeleton */}
+        <div className="mb-4 flex-grow min-h-[80px]">
+          <div className="space-y-2">
+            <div className="h-3 bg-gray-200 rounded w-full"></div>
+            <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+            <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+            <div className="h-3 bg-gray-200 rounded w-3/6"></div>
+          </div>
+        </div>
+
+        {/* Client Info Skeleton */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+          <div className="flex items-center">
+            <div className="w-10 h-10 rounded-full bg-gray-300 mr-3"></div>
+            <div>
+              <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 w-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <div key={star} className="w-3 h-3 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="h-1.5 bg-gray-200 flex-shrink-0"></div>
+    </div>
+  </div>
+);
+
+const VideoReviewsSkeleton = () => (
+  <div className="mb-12 md:mb-20">
+    <div className="max-w-7xl mx-auto px-4">
+      {/* Marquee Controls Skeleton */}
+      <div className="flex items-center justify-center space-x-4 mb-6">
+        <div className="px-4 py-2 bg-white border border-gray-200 rounded-lg w-40 h-10 animate-pulse"></div>
+        <div className="flex items-center">
+          <div className="w-3 h-3 rounded-full bg-gray-300 mr-2"></div>
+          <div className="w-16 h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+
+      {/* Marquee Container Skeleton */}
+      <div className="relative overflow-hidden rounded-xl">
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white via-white/95 to-transparent z-10"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white via-white/95 to-transparent z-10"></div>
+
+        <div className="flex space-x-6 py-6 px-2 overflow-hidden">
+          {[1, 2, 3, 4].map((index) => (
+            <VideoCardSkeleton key={`skeleton-card-${index}`} />
+          ))}
+        </div>
+      </div>
+
+      {/* Instructions Skeleton */}
+      <div className="mt-6 text-center">
+        <div className="h-4 w-64 bg-gray-200 rounded mx-auto animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const MotionCredit = () => {
   const controls = useAnimation();
   const ref = useRef(null);
@@ -346,21 +465,55 @@ const MotionCredit = () => {
     }, 300);
   };
 
+  // Find specific statistics by title
+  const getStatisticByTitle = (title) => {
+    return statistics.find((stat) =>
+      stat.title.toLowerCase().includes(title.toLowerCase())
+    );
+  };
+
+  // Get values for specific statistics
+  const getVideosValue = () => {
+    const projectStat = getStatisticByTitle("project");
+    return projectStat ? `${projectStat.value}+` : "500+";
+  };
+
+  const getBrandsValue = () => {
+    const brandStat = getStatisticByTitle("brand");
+    return brandStat ? `${brandStat.value}+` : "40+";
+  };
+
+  const getYearsValue = () => {
+    const yearStat = getStatisticByTitle("year");
+    return yearStat ? `${yearStat.value}+` : "3+";
+  };
+
+  // Prepare scrolling items
+  const scrollingItems = [
+    {
+      id: 1,
+      value: getVideosValue(),
+      title: "Videos Delivered",
+      type: "number",
+    },
+    {
+      id: 2,
+      value: getBrandsValue(),
+      title: "Trusted Brands",
+      type: "number",
+    },
+    {
+      id: 3,
+      value: getYearsValue(),
+      title: "Years Experience",
+      type: "number",
+    },
+  ];
+
   // Marquee Video Reviews Section
   const VideoReviewSection = () => {
     if (reviewsLoading) {
-      return (
-        <div className="mb-12 md:mb-20 text-center py-8 md:py-12">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full mx-auto"
-          />
-          <span className="ml-3 text-gray-600 text-sm md:text-base">
-            Loading video reviews...
-          </span>
-        </div>
-      );
+      return <VideoReviewsSkeleton />;
     }
 
     if (videoReviews.length === 0) {
@@ -522,51 +675,6 @@ const MotionCredit = () => {
     );
   };
 
-  // Find specific statistics by title
-  const getStatisticByTitle = (title) => {
-    return statistics.find((stat) =>
-      stat.title.toLowerCase().includes(title.toLowerCase())
-    );
-  };
-
-  // Get values for specific statistics
-  const getVideosValue = () => {
-    const projectStat = getStatisticByTitle("project");
-    return projectStat ? `${projectStat.value}+` : "500+";
-  };
-
-  const getBrandsValue = () => {
-    const brandStat = getStatisticByTitle("brand");
-    return brandStat ? `${brandStat.value}+` : "40+";
-  };
-
-  const getYearsValue = () => {
-    const yearStat = getStatisticByTitle("year");
-    return yearStat ? `${yearStat.value}+` : "3+";
-  };
-
-  // Prepare scrolling items
-  const scrollingItems = [
-    {
-      id: 1,
-      value: getVideosValue(),
-      title: "Videos Delivered",
-      type: "number",
-    },
-    {
-      id: 2,
-      value: getBrandsValue(),
-      title: "Trusted Brands",
-      type: "number",
-    },
-    {
-      id: 3,
-      value: getYearsValue(),
-      title: "Years Experience",
-      type: "number",
-    },
-  ];
-
   // Particle background effect
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -647,135 +755,15 @@ const MotionCredit = () => {
   }, []);
 
   return (
-    <motion.section
-      ref={ref}
-      className="relative py-12 md:py-20 lg:py-24 overflow-hidden bg-gradient-to-br from-white to-gray-50"
-      initial="hidden"
-      animate={controls}
-      variants={{
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: {
-            duration: 0.8,
-            ease: "easeOut",
-          },
-        },
-      }}
-    >
-      {/* Stats Grid */}
-      {!loading && (
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mt-12 md:mt-16"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.2,
-                delayChildren: 0.3,
-              },
-            },
-          }}
-        >
-          {/* Stat 1 - Videos Delivered */}
-          <motion.div
-            className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: {
-                  duration: 0.6,
-                  ease: "easeOut",
-                },
-              },
-            }}
-            whileHover={{
-              y: window.innerWidth >= 768 ? -5 : 0,
-              borderColor: "rgba(20, 184, 166, 0.3)",
-              transition: { duration: 0.3 },
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative z-10">
-              <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-teal-600 mb-1 md:mb-2">
-                {getVideosValue()}
-              </div>
-              <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
-                Videos Delivered
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stat 2 - Trusted Brands */}
-          <motion.div
-            className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-emerald-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: {
-                  duration: 0.6,
-                  ease: "easeOut",
-                  delay: 0.1,
-                },
-              },
-            }}
-            whileHover={{
-              y: window.innerWidth >= 768 ? -5 : 0,
-              borderColor: "rgba(16, 185, 129, 0.3)",
-              transition: { duration: 0.3 },
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative z-10">
-              <div className="text-3xl md:text-4xl font-anton lg:text-5xl font-bold text-emerald-600 mb-1 md:mb-2">
-                {getBrandsValue()}
-              </div>
-              <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
-                Trusted Brands
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stat 3 - Years Experience */}
-          <motion.div
-            className="text-center p-4 md:p-6 lg:p-8 bg-white rounded-xl md:rounded-2xl border border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: {
-                  duration: 0.6,
-                  ease: "easeOut",
-                  delay: 0.2,
-                },
-              },
-            }}
-            whileHover={{
-              y: window.innerWidth >= 768 ? -5 : 0,
-              borderColor: "rgba(34, 197, 94, 0.3)",
-              transition: { duration: 0.3 },
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative z-10">
-              <div className="text-3xl font-anton md:text-4xl lg:text-5xl font-bold text-green-600 mb-1 md:mb-2">
-                {getYearsValue()}
-              </div>
-              <div className="text-gray-600 font-poppins font-light tracking-wide text-sm md:text-base">
-                Years Experience
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-      {/* Scrolling Credibility Strip */}
-      {!loading && (
+    <div>
+      {/* Statistics Strip - Show skeleton while loading */}
+      {loading ? (
+        <StatisticsSkeleton />
+      ) : error ? (
+        <div className="text-center py-6 md:py-8">
+          <p className="text-amber-600 text-sm md:text-base">{error}</p>
+        </div>
+      ) : (
         <div className="relative overflow-hidden py-6 md:py-8 border-y border-teal-200 bg-gradient-to-r from-teal-50 to-emerald-50 backdrop-blur-sm">
           {/* Glowing edges */}
           <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10"></div>
@@ -849,88 +837,85 @@ const MotionCredit = () => {
           </motion.div>
         </div>
       )}
-      {/* Animated particle background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full opacity-30 md:opacity-50 "
-      />
 
-      {/* Glowing orbs with light colors */}
-      <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-teal-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"></div>
-      <div
-        className="absolute bottom-1/3 right-1/3 w-40 h-40 md:w-80 md:h-80 bg-emerald-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"
-        style={{ animationDelay: "2s" }}
-      ></div>
-      <div
-        className="absolute top-2/3 left-1/3 w-32 h-32 md:w-64 md:h-64 bg-green-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"
-        style={{ animationDelay: "4s" }}
-      ></div>
-
-      {/* Subtle vignette effect */}
-      <div className="absolute inset-0 shadow-[inset_0_0_50px_10px_rgba(255,255,255,0.5)] md:shadow-[inset_0_0_100px_20px_rgba(255,255,255,0.5)]"></div>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 mt-20 lg:px-6">
-        <SectionHeader
-          subtitle="What Our Clients Say"
-          title="Trusted by Creators"
-          highlight="Worldwide"
-          description="Delivering exceptional video editing results that transform content and drive engagement"
-          center={true}
-          titleSize="xl"
-          titleWeight="normal"
-          descriptionSize="base md:lg"
-          highlightColor="teal-500"
-          lineSpacing="tight"
-          dotColor="teal-500"
+      <motion.section
+        ref={ref}
+        className="relative py-12 md:py-20 lg:py-24 overflow-hidden bg-gradient-to-br from-white to-gray-50"
+        initial="hidden"
+        animate={controls}
+        variants={{
+          hidden: { opacity: 0 },
+          visible: {
+            opacity: 1,
+            transition: {
+              duration: 0.8,
+              ease: "easeOut",
+            },
+          },
+        }}
+      >
+        {/* Animated particle background */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full opacity-30 md:opacity-50 "
         />
 
-        {/* Marquee Video Reviews Section */}
-        <VideoReviewSection />
+        {/* Glowing orbs with light colors */}
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 md:w-96 md:h-96 bg-teal-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"></div>
+        <div
+          className="absolute bottom-1/3 right-1/3 w-40 h-40 md:w-80 md:h-80 bg-emerald-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="absolute top-2/3 left-1/3 w-32 h-32 md:w-64 md:h-64 bg-green-100 rounded-full blur-2xl md:blur-3xl animate-pulse-slow"
+          style={{ animationDelay: "4s" }}
+        ></div>
 
-        {/* Loading State for Statistics */}
-        {loading && (
-          <div className="flex justify-center items-center py-6 md:py-8">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full"
-            />
-            <span className="ml-2 text-gray-600 text-sm md:text-base">
-              Loading statistics...
-            </span>
-          </div>
-        )}
+        {/* Subtle vignette effect */}
+        <div className="absolute inset-0 shadow-[inset_0_0_50px_10px_rgba(255,255,255,0.5)] md:shadow-[inset_0_0_100px_20px_rgba(255,255,255,0.5)]"></div>
 
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-6 md:py-8">
-            <p className="text-amber-600 text-sm md:text-base">{error}</p>
-          </div>
-        )}
-      </div>
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <SectionHeader
+            subtitle="What Our Clients Say"
+            title="Trusted by Creators"
+            highlight="Worldwide"
+            description="Delivering exceptional video editing results that transform content and drive engagement"
+            center={true}
+            titleSize="xl"
+            titleWeight="normal"
+            descriptionSize="base md:lg"
+            highlightColor="teal-500"
+            lineSpacing="tight"
+            dotColor="teal-500"
+          />
 
-      <style jsx>{`
-        @keyframes pulse-slow {
-          0%,
-          100% {
-            opacity: 0.3;
+          {/* Marquee Video Reviews Section */}
+          <VideoReviewSection />
+        </div>
+
+        <style jsx>{`
+          @keyframes pulse-slow {
+            0%,
+            100% {
+              opacity: 0.3;
+            }
+            50% {
+              opacity: 0.6;
+            }
           }
-          50% {
-            opacity: 0.6;
+          .animate-pulse-slow {
+            animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .line-clamp-4 {
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
-    </motion.section>
+          .line-clamp-4 {
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+        `}</style>
+      </motion.section>
+    </div>
   );
 };
 

@@ -410,6 +410,228 @@ const useVideoAutoplay = (videoRef, loadingIntroduction) => {
   };
 };
 
+// Skeleton Loader Component
+const HeroSectionSkeleton = () => {
+  // Create a dummy videoTools array for the skeleton
+  const dummyVideoTools = [
+    { name: "DaVinci Resolve", logo: null },
+    { name: "Premier Pro", logo: null },
+    { name: "Final Cut Pro", logo: null },
+    { name: "CapCut", logo: null },
+    { name: "After Effects", logo: null },
+    { name: "Blender", logo: null },
+  ];
+
+  return (
+    <motion.div
+      className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/80 flex flex-col items-center justify-start pt-20 pb-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* Background Logo Animation - keep it visible */}
+      <BackgroundLogoAnimation />
+
+      {/* Floating App Logos Skeleton - show placeholder logos */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-25">
+        {dummyVideoTools.map((_, index) => {
+          const positions = [
+            { top: "15%", left: "8%" },
+            { top: "22%", right: "12%" },
+            { top: "65%", left: "6%" },
+            { bottom: "20%", right: "8%" },
+            { top: "42%", right: "5%" },
+            { bottom: "32%", left: "20%" },
+          ];
+
+          return (
+            <motion.div
+              key={`skeleton-floating-${index}`}
+              className="absolute z-30"
+              style={positions[index]}
+              animate={{
+                opacity: [0.3, 0.6, 0.3],
+                y: [0, -15, 0],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                delay: index * 1,
+              }}
+            >
+              <div className="w-16 h-16 bg-gray-200/50 backdrop-blur-sm rounded-xl animate-pulse" />
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Main Content Skeleton */}
+      <div className="relative z-30 w-full max-w-4xl px-4">
+        {/* Title Section Skeleton */}
+        <div className="text-center mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="h-4 w-48 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full mx-auto mb-4 animate-pulse" />
+            <div className="space-y-3">
+              <div className="h-10 w-96 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg mx-auto animate-pulse" />
+              <div className="h-6 w-64 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg mx-auto animate-pulse" />
+            </div>
+            <div className="h-4 w-96 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full mx-auto mt-4 animate-pulse" />
+          </motion.div>
+        </div>
+
+        {/* Video Label Skeleton */}
+        <motion.div
+          className="text-center mb-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="inline-flex items-center gap-2 bg-white/95 backdrop-blur-md rounded-lg px-4 py-2 shadow-md border border-gray-200">
+            <div className="flex gap-1">
+              <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+            </div>
+            <div className="h-4 w-48 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
+          </div>
+        </motion.div>
+
+        {/* Video Player Skeleton */}
+        <motion.div
+          className="w-full h-[380px] lg:h-[480px] relative overflow-hidden rounded-xl border-4 border-white/95 shadow-xl bg-white"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
+            <div className="flex flex-col items-center w-full max-w-md px-6">
+              {/* Animated Spinner */}
+              <div className="relative mb-6">
+                <div className="w-20 h-20 border-4 border-teal-100 rounded-full"></div>
+                <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-teal-500 rounded-full animate-spin"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-10 h-10 bg-gradient-to-r from-teal-400/20 to-teal-500/20 rounded-full blur-sm"></div>
+                </div>
+              </div>
+
+              {/* Loading Text */}
+              <div className="space-y-3 text-center mb-8">
+                <div className="h-4 w-48 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse mx-auto"></div>
+                <div className="h-3 w-32 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse mx-auto"></div>
+                <div className="h-2 w-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse mx-auto"></div>
+              </div>
+
+              {/* Progress Bar Skeleton */}
+              <div className="w-full space-y-2">
+                <div className="h-1.5 bg-gray-200 rounded-full w-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-teal-400 to-teal-600"
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 2,
+                      ease: "linear",
+                    }}
+                  />
+                </div>
+
+                {/* Video Controls Skeleton */}
+                <div className="flex justify-between items-center mt-4">
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Video Info Banner Skeleton */}
+          <div className="absolute top-4 left-4 z-10">
+            <div className="h-6 w-40 bg-gray-200/70 backdrop-blur-sm rounded-md animate-pulse"></div>
+          </div>
+        </motion.div>
+
+        {/* Status Indicator Skeleton */}
+        <motion.div
+          className="text-center mt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="inline-flex items-center gap-2">
+            <div className="w-2 h-2 bg-gray-300 rounded-full animate-pulse"></div>
+            <div className="h-3 w-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
+          </div>
+        </motion.div>
+
+        {/* Marquee Skeleton */}
+        <motion.div
+          className="relative w-full mt-6"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <div className="bg-white/95 backdrop-blur-md rounded-lg p-3 shadow-md border border-gray-200 overflow-hidden">
+            <div className="flex gap-8">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="flex items-center gap-8 shrink-0">
+                  <div className="h-4 w-20 bg-gradient-to-r from-gray-200 to-gray-300 rounded animate-pulse"></div>
+                  <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* CTA Buttons Skeleton */}
+        <motion.div
+          className="flex justify-center gap-4 mt-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          <div className="h-10 w-32 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
+          <div className="h-10 w-32 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
+        </motion.div>
+      </div>
+
+      {/* Subtle Floating Particles (keep them for visual interest) */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={`skeleton-particle-${i}`}
+          className="absolute w-1 h-1 bg-gray-300/30 rounded-full"
+          style={{
+            left: `${5 + i * 10}%`,
+            top: `${10 + i * 8}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            x: [0, 10, 0],
+            opacity: [0.1, 0.3, 0.1],
+          }}
+          transition={{
+            duration: 10 + i,
+            repeat: Infinity,
+            delay: i * 0.8,
+          }}
+        />
+      ))}
+    </motion.div>
+  );
+};
+
 const HeroSection = () => {
   const videoRef = useRef(null);
   const [loadingIntroduction, setLoadingIntroduction] = useState(true);
@@ -459,7 +681,7 @@ const HeroSection = () => {
     []
   );
 
-  // Fallback video URLs - use a dummy video or placeholder
+  // Fallback video URLs
   const fallbackVideos = useMemo(
     () => [
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -561,7 +783,7 @@ const HeroSection = () => {
     window.location.href = "/projects";
   }, []);
 
-  // Determine video source and poster - with better fallback logic
+  // Determine video source and poster
   const { videoSource, videoPoster, videoTitle } = useMemo(() => {
     if (hasVideoData && introductionVideo?.videoUrl) {
       return {
@@ -570,7 +792,6 @@ const HeroSection = () => {
         videoTitle: `${introductionVideo.title || "INTRODUCTION"}.MP4`,
       };
     } else {
-      // Use fallback video
       const randomIndex = Math.floor(Math.random() * fallbackVideos.length);
       return {
         videoSource: fallbackVideos[randomIndex],
@@ -580,36 +801,10 @@ const HeroSection = () => {
     }
   }, [hasVideoData, introductionVideo, fallbackVideos, fallbackPosters]);
 
-  // Text animation variants
-  const containerVariants = useMemo(
-    () => ({
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: {
-          staggerChildren: 0.15,
-          delayChildren: 0.4,
-          ease: [0.25, 0.1, 0.25, 1],
-        },
-      },
-    }),
-    []
-  );
-
-  const itemVariants = useMemo(
-    () => ({
-      hidden: { y: 20, opacity: 0 },
-      visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-          duration: 0.8,
-          ease: [0.25, 0.1, 0.25, 1],
-        },
-      },
-    }),
-    []
-  );
+  // Show skeleton while loading
+  if (loadingIntroduction) {
+    return <HeroSectionSkeleton />;
+  }
 
   return (
     <motion.div
@@ -671,19 +866,7 @@ const HeroSection = () => {
             transition: { duration: 0.3 },
           }}
         >
-          {loadingIntroduction ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl flex items-center justify-center z-30">
-              <div className="flex flex-col items-center">
-                <div className="relative">
-                  <div className="w-12 h-12 border-3 border-blue-200 rounded-full"></div>
-                  <div className="absolute top-0 left-0 w-12 h-12 border-3 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
-                </div>
-                <p className="text-blue-600 font-medium text-xs mt-2">
-                  Loading creative showcase...
-                </p>
-              </div>
-            </div>
-          ) : !hasVideoData ? (
+          {!hasVideoData ? (
             <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-amber-50 rounded-xl flex flex-col items-center justify-center z-30 p-6">
               <div className="flex flex-col items-center text-center max-w-md">
                 <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">

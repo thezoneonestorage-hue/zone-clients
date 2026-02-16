@@ -98,16 +98,15 @@ const Home = () => {
       </div>
 
       {/* Featured Portfolio - Lazy load with intersection observer */}
-      <LazyLoader height="70vh" threshold={0.05}>
-        <Suspense fallback={<SectionPlaceholder height="70vh" />}>
-          <MotionCredit />
-        </Suspense>
-      </LazyLoader>
-
-      {/* Featured Portfolio - Lazy load with intersection observer */}
       <LazyLoader height="70vh">
         <Suspense fallback={<SectionPlaceholder height="70vh" />}>
           <FeaturedPortfolio />
+        </Suspense>
+      </LazyLoader>
+      {/* Featured Portfolio - Lazy load with intersection observer */}
+      <LazyLoader height="70vh" threshold={0.05}>
+        <Suspense fallback={<SectionPlaceholder height="70vh" />}>
+          <MotionCredit />
         </Suspense>
       </LazyLoader>
 

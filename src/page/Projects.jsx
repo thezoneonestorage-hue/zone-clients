@@ -22,6 +22,7 @@ import premier from "../assets/premier.png";
 import cap_cut from "../assets/cap-cut.png";
 import after_effect from "../assets/after-effect.png";
 import final_cut from "../assets/final-cut.png";
+import SectionHeader from "../components/Shared/SectionHeader";
 
 // Enhanced Background Animation with smoother logo animation
 const FluidBackground = () => {
@@ -809,29 +810,19 @@ const Projects = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-teal-50 to-teal-100/50 border border-teal-200 mb-4">
-            <FiFilm className="w-4 h-4 text-teal-600" />
-            <span className="text-sm font-poppins font-medium text-teal-700">
-              Portfolio Showcase
-            </span>
-          </div>
 
-          <h1 className="text-4xl font-anton md:text-5xl font-light text-gray-800 mb-4">
-            Our{" "}
-            <span className="font-semibold text-teal-600">Visual Projects</span>
-          </h1>
-
-          <p className="text-lg font-poppins text-gray-600 max-w-2xl mx-auto">
-            Discover our collection of video editing projects showcasing
-            expertise in storytelling, color grading, and visual effects.
-          </p>
-        </motion.div>
+        <SectionHeader
+          subtitle="Portfolio Showcase"
+          title="Our"
+          highlight="Visual Projects"
+          description="Discover our collection of video editing projects showcasing expertise in storytelling, color grading, and visual effects."
+          center={true}
+          titleSize="2xl"
+          titleWeight="medium"
+          descriptionSize="lg"
+          highlightWeight=""
+          highlightOnNewLine={false}
+        />
 
         {/* Layout Switcher */}
         <motion.div

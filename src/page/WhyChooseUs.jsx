@@ -26,6 +26,7 @@ import {
   FaGlobe,
 } from "react-icons/fa";
 import { getAboutPage, iconMap } from "../services/api"; // Update the path
+import SectionHeader from "../components/Shared/SectionHeader";
 
 // Helper function to get icon component
 const getIconComponent = (iconName) => {
@@ -135,30 +136,20 @@ const AboutUs = () => {
   } = aboutData;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br font-poppins from-teal-50 via-white to-emerald-50/30">
+    <div className="min-h-screen bg-gradient-to-br py-20 font-poppins from-teal-50 via-white to-emerald-50/30">
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-100 rounded-full text-teal-700 text-sm font-medium mb-8">
-            <FaStar className="w-4 h-4" />
-            <span>About {agencyInfo?.name || "VisionCraft"}</span>
-          </div>
 
-          <h1 className="text-5xl font-anton md:text-6xl font-bold text-gray-900 mb-6">
-            {agencyInfo?.tagline || "We Craft Visual Stories"}
-          </h1>
-
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-            {agencyInfo?.mission ||
-              "Transforming ideas into cinematic experiences through precision editing, motion design, and creative innovation."}
-          </p>
-        </motion.div>
-      </div>
+      <SectionHeader
+        subtitle="About Zoneone"
+        title="We Craft"
+        highlight="Visual Stories"
+        description="Transforming ideas into cinematic experiences through precision editing, motion design, and creative innovation."
+        center={true}
+        titleSize="2xl"
+        titleWeight="medium"
+        descriptionSize="lg"
+        highlightWeight=""
+      />
 
       {/* Agency Description Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
@@ -219,7 +210,7 @@ const AboutUs = () => {
 
             <h2 className="text-4xl font-anton font-bold text-gray-900">
               Where Creativity Meets{" "}
-              <span className="text-teal-600">Technology</span>
+              <span className="text-teal-500">Technology</span>
             </h2>
 
             <div className="space-y-4 text-gray-600 leading-relaxed">

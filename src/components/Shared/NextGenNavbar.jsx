@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BookingModal from "../BookingModal";
 import { verifyTokenOnInit, logout } from "../../services/api"; // Adjust path as needed
 import logo from "../../assets/Zone-logo.png";
@@ -76,20 +76,26 @@ const NextGenNavbar = () => {
       setUser(null);
       setIsProfileOpen(false);
       // Redirect to home page after logout
-      navigate("/");
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
       // Still update UI even if API call fails
       setIsAuthenticated(false);
       setUser(null);
       setIsProfileOpen(false);
-      navigate("/");
+      window.location.href = "/";
     }
   };
 
   const handleDashboard = () => {
     setIsProfileOpen(false);
-    navigate("/dashboard"); // Adjust dashboard route as needed
+    window.location.href = "/dashboard"; // Adjust dashboard route as needed
+  };
+
+  const handleNavigation = (path) => {
+    setIsOpen(false);
+    setIsProfileOpen(false);
+    window.location.href = path;
   };
 
   const menuItems = [
@@ -212,7 +218,14 @@ const NextGenNavbar = () => {
             variants={itemVariants}
             whileHover={{ scale: 1.05 }}
           >
-            <Link to="/" className="flex items-center">
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigation("/");
+              }}
+              className="flex items-center focus:outline-none cursor-pointer"
+            >
               <div className="relative group">
                 <div className="flex items-center justify-center overflow-hidden">
                   <img
@@ -222,7 +235,7 @@ const NextGenNavbar = () => {
                   />
                 </div>
               </div>
-            </Link>
+            </a>
           </motion.div>
 
           {/* Desktop Menu */}
@@ -238,9 +251,13 @@ const NextGenNavbar = () => {
                 whileHover={{ y: -2 }}
                 whileTap={{ y: 0 }}
               >
-                <Link
-                  to={item.path}
-                  className={`relative px-4 py-2 group block ${
+                <a
+                  href={item.path}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation(item.path);
+                  }}
+                  className={`relative px-4 py-2 group block focus:outline-none cursor-pointer ${
                     location.pathname === item.path
                       ? "text-teal-600"
                       : "text-gray-600 hover:text-gray-900"
@@ -255,7 +272,7 @@ const NextGenNavbar = () => {
                     } transition-transform duration-300 origin-left`}
                   ></div>
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-teal-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </Link>
+                </a>
               </motion.div>
             ))}
 
@@ -473,14 +490,14 @@ const NextGenNavbar = () => {
             >
               <div className="py-4 bg-white/95 backdrop-blur-lg rounded-lg border border-teal-200 shadow-xl">
                 {menuItems.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Link
-                      to={item.path}
-                      className={`block px-6 py-3 transition-colors duration-300 ${
+                  <motion.div key={index} whileTap={{ scale: 0.98 }}>
+                    <a
+                      href={item.path}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation(item.path);
+                      }}
+                      className={`block w-full text-left px-6 py-3 transition-colors duration-300 focus:outline-none cursor-pointer ${
                         location.pathname === item.path
                           ? "text-teal-600 bg-teal-50"
                           : "text-gray-600 hover:text-gray-900 hover:bg-teal-50"
@@ -490,7 +507,7 @@ const NextGenNavbar = () => {
                         <span className="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>
                         {item.name}
                       </span>
-                    </Link>
+                    </a>
                   </motion.div>
                 ))}
 

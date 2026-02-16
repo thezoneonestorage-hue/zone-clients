@@ -3,9 +3,99 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import SectionHeader from "../Shared/SectionHeader";
 import bg from "/ICON.png";
 
+// Service Card Skeleton Component
+const ServiceCardSkeleton = () => (
+  <div className="relative group w-72 md:w-80 animate-pulse">
+    <div className="relative bg-gradient-to-br from-white to-gray-100 rounded-3xl border-2 border-gray-200 p-8 shadow-lg">
+      {/* Decorative circles */}
+      <div className="absolute -top-2 -left-2 w-8 h-8 bg-gray-200 rounded-full"></div>
+      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gray-200 rounded-full"></div>
+
+      {/* Icon placeholder */}
+      <div className="absolute -top-4 -right-4 w-16 h-16 bg-gray-300 rounded-2xl"></div>
+
+      {/* Number placeholder */}
+      <div className="w-14 h-14 bg-gray-300 rounded-2xl mb-6"></div>
+
+      <div className="space-y-5">
+        {/* Title placeholder */}
+        <div className="h-8 bg-gray-300 rounded w-3/4"></div>
+
+        {/* Divider line */}
+        <div className="h-1 w-16 bg-gray-300 rounded-full"></div>
+
+        {/* Description lines */}
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+        </div>
+      </div>
+
+      {/* Background overlay */}
+      <div className="absolute inset-0 rounded-3xl bg-gray-100/50 -z-10"></div>
+    </div>
+  </div>
+);
+
+// Full Page Skeleton Component
+const NextGenServicesSkeleton = () => {
+  return (
+    <div className="flex flex-col text-left justify-center items-center w-full mx-auto py-12 gap-16 md:gap-24 relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/90">
+      {/* Header Section Skeleton */}
+      <div className="text-center space-y-4 animate-pulse">
+        <div className="h-6 w-48 bg-gray-300 rounded-full mx-auto"></div>
+        <div className="space-y-3">
+          <div className="h-12 w-96 bg-gray-300 rounded-lg mx-auto"></div>
+          <div className="h-12 w-80 bg-gray-300 rounded-lg mx-auto"></div>
+        </div>
+        <div className="h-5 w-72 bg-gray-200 rounded-full mx-auto"></div>
+      </div>
+
+      {/* Services Steps Skeleton */}
+      <div className="relative flex flex-col items-center justify-center w-full gap-12 p-4 md:gap-20 z-10">
+        {/* Service 1 & 2 Skeleton */}
+        <div className="relative flex flex-col items-center justify-center w-full max-w-4xl gap-12 md:flex-row md:gap-32">
+          <ServiceCardSkeleton />
+          <ServiceCardSkeleton />
+        </div>
+
+        {/* Service 3 & 4 Skeleton */}
+        <div className="relative flex flex-col items-center justify-center w-full max-w-4xl gap-12 md:flex-row md:gap-32">
+          <ServiceCardSkeleton />
+          <ServiceCardSkeleton />
+        </div>
+
+        {/* Service 5 & 6 Skeleton */}
+        <div className="relative flex flex-col items-center justify-center w-full max-w-4xl gap-12 md:flex-row md:gap-32">
+          <ServiceCardSkeleton />
+          <ServiceCardSkeleton />
+        </div>
+      </div>
+
+      {/* CTA Section Skeleton */}
+      <div className="text-center mt-12 relative z-10 p-6 animate-pulse">
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/80 border border-gray-200 shadow-sm mb-6">
+          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+          <div className="h-4 w-32 bg-gray-300 rounded"></div>
+          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+        </div>
+
+        <div className="h-6 w-96 bg-gray-300 rounded mx-auto mb-8"></div>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="px-8 py-4 bg-gray-300 rounded-full w-48 h-14"></div>
+          <div className="px-8 py-4 bg-gray-200 rounded-full w-48 h-14"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const NextGenServices = () => {
   const containerRef = useRef(null);
   const [activeService, setActiveService] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const services = [
     {
@@ -58,8 +148,18 @@ const NextGenServices = () => {
     },
   ];
 
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Only initialize useScroll when not loading
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: !loading ? containerRef : undefined,
     offset: ["start start", "end end"],
   });
 
@@ -70,11 +170,13 @@ const NextGenServices = () => {
   );
 
   useEffect(() => {
-    const unsubscribe = serviceProgress.on("change", (latest) => {
-      setActiveService(Math.floor(latest));
-    });
-    return () => unsubscribe();
-  }, [serviceProgress]);
+    if (!loading) {
+      const unsubscribe = serviceProgress.on("change", (latest) => {
+        setActiveService(Math.floor(latest));
+      });
+      return () => unsubscribe();
+    }
+  }, [serviceProgress, loading]);
 
   // Animation variants
   const cardVariants = {
@@ -454,6 +556,11 @@ const NextGenServices = () => {
       </div>
     );
   };
+
+  // Show skeleton while loading
+  if (loading) {
+    return <NextGenServicesSkeleton />;
+  }
 
   return (
     <div

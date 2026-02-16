@@ -100,13 +100,13 @@ const BookingModal = ({ isOpen, onClose }) => {
             onClick={onClose}
           />
 
-          {/* Gradient overlays for soft effect */}
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-50/60 to-white/80"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-100/40 to-blue-50/40"></div>
+          {/* Gradient overlays for teal/emerald soft effect */}
+          <div className="absolute inset-0 bg-gradient-to-b from-teal-50/60 to-emerald-50/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-100/40 to-emerald-50/40"></div>
 
           {/* Modal Content - Centered */}
           <motion.div
-            className="relative bg-white border border-gray-200 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden mx-auto"
+            className="relative bg-white border border-teal-200 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden mx-auto"
             variants={modalVariants}
             style={{
               // Ensure modal stays centered
@@ -116,11 +116,11 @@ const BookingModal = ({ isOpen, onClose }) => {
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white hover:bg-gray-50 border border-gray-300 flex items-center justify-center transition-all duration-200 group shadow-sm"
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white hover:bg-teal-50 border border-teal-200 flex items-center justify-center transition-all duration-200 group shadow-sm"
               aria-label="Close modal"
             >
               <svg
-                className="w-4 h-4 text-gray-600 group-hover:text-gray-800"
+                className="w-4 h-4 text-teal-600 group-hover:text-teal-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -135,12 +135,12 @@ const BookingModal = ({ isOpen, onClose }) => {
             </button>
 
             <div className="max-h-[90vh] overflow-y-auto">
-              <div className="bg-gradient-to-br from-white via-gray-50 to-blue-50/30 py-8 px-6 sm:px-8 border-b border-gray-200">
+              <div className="bg-gradient-to-br from-white via-teal-50/30 to-emerald-50/30 py-8 px-6 sm:px-8 border-b border-teal-200">
                 <div className="max-w-6xl mx-auto">
                   {/* Header Section */}
                   <div className="text-center mb-8">
                     <motion.h2
-                      className="text-gray-600 font-mono uppercase tracking-widest text-sm md:text-base mb-4"
+                      className="text-teal-600 font-mono uppercase tracking-widest text-sm md:text-base mb-4"
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.2 }}
@@ -155,7 +155,7 @@ const BookingModal = ({ isOpen, onClose }) => {
                       transition={{ delay: 0.3 }}
                     >
                       Schedule Your{" "}
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-700 to-gray-900">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">
                         1-Hour Consultation
                       </span>
                     </motion.h1>
@@ -173,13 +173,13 @@ const BookingModal = ({ isOpen, onClose }) => {
                     {/* Success Message */}
                     {bookingCompleted && (
                       <motion.div
-                        className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4 max-w-md mx-auto backdrop-blur-sm"
+                        className="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4 max-w-md mx-auto backdrop-blur-sm"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                       >
                         <div className="flex items-center justify-center">
                           <svg
-                            className="w-5 h-5 text-green-600 mr-2"
+                            className="w-5 h-5 text-emerald-600 mr-2"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
@@ -189,7 +189,7 @@ const BookingModal = ({ isOpen, onClose }) => {
                               clipRule="evenodd"
                             />
                           </svg>
-                          <span className="text-green-700 font-medium">
+                          <span className="text-emerald-700 font-medium">
                             Booking confirmed! Check your email for details.
                           </span>
                         </div>
@@ -203,18 +203,18 @@ const BookingModal = ({ isOpen, onClose }) => {
                     <div className="lg:col-span-1 space-y-4">
                       {/* Quick Info Card */}
                       <motion.div
-                        className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+                        className="bg-white rounded-xl border border-teal-200 p-4 shadow-sm"
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.5 }}
                       >
-                        <h3 className="font-semibold text-gray-700 mb-3 font-mono">
+                        <h3 className="font-semibold text-teal-700 mb-3 font-mono">
                           SESSION DETAILS
                         </h3>
                         <div className="space-y-3">
                           <div className="flex items-center text-sm">
                             <svg
-                              className="w-4 h-4 text-gray-600 mr-2"
+                              className="w-4 h-4 text-teal-600 mr-2"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -230,7 +230,7 @@ const BookingModal = ({ isOpen, onClose }) => {
                           </div>
                           <div className="flex items-center text-sm">
                             <svg
-                              className="w-4 h-4 text-gray-600 mr-2"
+                              className="w-4 h-4 text-teal-600 mr-2"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -248,7 +248,7 @@ const BookingModal = ({ isOpen, onClose }) => {
                           </div>
                           <div className="flex items-center text-sm">
                             <svg
-                              className="w-4 h-4 text-gray-600 mr-2"
+                              className="w-4 h-4 text-teal-600 mr-2"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -267,35 +267,35 @@ const BookingModal = ({ isOpen, onClose }) => {
 
                       {/* Features Card */}
                       <motion.div
-                        className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+                        className="bg-white rounded-xl border border-teal-200 p-4 shadow-sm"
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.6 }}
                       >
-                        <h3 className="font-semibold text-gray-700 mb-3 font-mono">
+                        <h3 className="font-semibold text-teal-700 mb-3 font-mono">
                           WHAT WE'LL COVER
                         </h3>
                         <ul className="space-y-2 text-sm">
                           <li className="flex items-center">
-                            <div className="w-2 h-2 bg-gray-600 rounded-full mr-3"></div>
+                            <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
                             <span className="text-gray-600">
                               Project analysis & strategy
                             </span>
                           </li>
                           <li className="flex items-center">
-                            <div className="w-2 h-2 bg-gray-600 rounded-full mr-3"></div>
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3"></div>
                             <span className="text-gray-600">
                               Creative direction & vision
                             </span>
                           </li>
                           <li className="flex items-center">
-                            <div className="w-2 h-2 bg-gray-600 rounded-full mr-3"></div>
+                            <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
                             <span className="text-gray-600">
                               Technical requirements
                             </span>
                           </li>
                           <li className="flex items-center">
-                            <div className="w-2 h-2 bg-gray-600 rounded-full mr-3"></div>
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full mr-3"></div>
                             <span className="text-gray-600">
                               Timeline & deliverables
                             </span>
@@ -305,12 +305,12 @@ const BookingModal = ({ isOpen, onClose }) => {
 
                       {/* Support Card */}
                       <motion.div
-                        className="bg-gray-50 rounded-xl border border-gray-200 p-4 shadow-sm"
+                        className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl border border-teal-200 p-4 shadow-sm"
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.7 }}
                       >
-                        <h3 className="font-semibold text-gray-700 mb-2 font-mono">
+                        <h3 className="font-semibold text-teal-700 mb-2 font-mono">
                           NEED HELP?
                         </h3>
                         <p className="text-gray-600 text-xs mb-3">
@@ -318,7 +318,7 @@ const BookingModal = ({ isOpen, onClose }) => {
                         </p>
                         <a
                           href="mailto:support@yourdomain.com"
-                          className="text-gray-700 hover:text-gray-900 text-xs font-medium inline-flex items-center group"
+                          className="text-teal-600 hover:text-teal-700 text-xs font-medium inline-flex items-center group"
                         >
                           Contact support
                           <svg
@@ -341,7 +341,7 @@ const BookingModal = ({ isOpen, onClose }) => {
                     {/* Calendar Section */}
                     <div className="lg:col-span-3">
                       <motion.div
-                        className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+                        className="bg-white rounded-xl border border-teal-200 overflow-hidden shadow-sm"
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.5 }}
@@ -349,8 +349,8 @@ const BookingModal = ({ isOpen, onClose }) => {
                         {/* Loading State */}
                         {isLoading && (
                           <div className="flex items-center justify-center py-16">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-600"></div>
-                            <span className="ml-3 text-gray-600 font-mono">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600"></div>
+                            <span className="ml-3 text-teal-600 font-mono">
                               Loading calendar...
                             </span>
                           </div>
@@ -376,22 +376,22 @@ const BookingModal = ({ isOpen, onClose }) => {
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.8 }}
                       >
-                        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-                          <div className="text-xl font-bold text-gray-700 mb-1 font-mono">
+                        <div className="bg-white rounded-lg p-3 border border-teal-200 shadow-sm hover:border-teal-300 transition-colors">
+                          <div className="text-xl font-bold text-teal-600 mb-1 font-mono">
                             01
                           </div>
                           <p className="text-xs text-gray-600">
                             Select your time
                           </p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-                          <div className="text-xl font-bold text-gray-700 mb-1 font-mono">
+                        <div className="bg-white rounded-lg p-3 border border-teal-200 shadow-sm hover:border-teal-300 transition-colors">
+                          <div className="text-xl font-bold text-emerald-600 mb-1 font-mono">
                             02
                           </div>
                           <p className="text-xs text-gray-600">Enter details</p>
                         </div>
-                        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-                          <div className="text-xl font-bold text-gray-700 mb-1 font-mono">
+                        <div className="bg-white rounded-lg p-3 border border-teal-200 shadow-sm hover:border-teal-300 transition-colors">
+                          <div className="text-xl font-bold text-teal-600 mb-1 font-mono">
                             03
                           </div>
                           <p className="text-xs text-gray-600">
@@ -405,11 +405,11 @@ const BookingModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Decorative elements */}
+            {/* Decorative elements with teal/emerald colors */}
             <div className="absolute top-4 left-4 flex gap-2 z-10">
-              <span className="w-2 h-2 rounded-full bg-gray-400 shadow-sm"></span>
-              <span className="w-2 h-2 rounded-full bg-gray-500 shadow-sm"></span>
-              <span className="w-2 h-2 rounded-full bg-gray-600 shadow-sm"></span>
+              <span className="w-2 h-2 rounded-full bg-teal-400 shadow-sm"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm"></span>
+              <span className="w-2 h-2 rounded-full bg-teal-600 shadow-sm"></span>
             </div>
           </motion.div>
         </motion.div>

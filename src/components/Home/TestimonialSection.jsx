@@ -3,6 +3,103 @@ import { motion, useInView } from "framer-motion";
 import { getReviews } from "../../services/api";
 import SectionHeader from "../Shared/SectionHeader";
 
+// Skeleton Components
+const TestimonialCardSkeleton = () => (
+  <div className="relative group cursor-default mb-4 lg:mb-5 animate-pulse">
+    <div className="relative bg-white/95 backdrop-blur-xl rounded-xl lg:rounded-2xl border border-white/20 shadow-lg lg:shadow-xl p-4 lg:p-6 h-[170px] lg:h-[190px] flex flex-col">
+      {/* Floating elements skeleton */}
+      <div className="absolute -top-1.5 -right-1.5 lg:-top-2 lg:-right-2 w-4 h-4 lg:w-5 lg:h-5 bg-gray-300 rounded-full"></div>
+
+      {/* Rating stars skeleton */}
+      <div className="flex mb-2 lg:mb-3 gap-1">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="w-3.5 h-3.5 lg:w-4 lg:h-4 bg-gray-300 rounded"
+          ></div>
+        ))}
+      </div>
+
+      {/* Quote skeleton */}
+      <div className="space-y-1.5 mb-3 lg:mb-4 flex-1">
+        <div className="h-2 bg-gray-200 rounded w-full"></div>
+        <div className="h-2 bg-gray-200 rounded w-5/6"></div>
+        <div className="h-2 bg-gray-200 rounded w-4/6"></div>
+      </div>
+
+      {/* Author info skeleton */}
+      <div className="relative pt-2 lg:pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="h-3 bg-gray-300 rounded w-24"></div>
+            <div className="h-2 bg-gray-200 rounded w-16"></div>
+          </div>
+
+          {/* Stats badge skeleton */}
+          <div className="px-2 py-1 lg:px-3 lg:py-1.5 bg-gray-300 rounded-full ml-2 w-14 h-6 lg:h-7"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const MobileMarqueeSkeleton = () => (
+  <div className="lg:hidden relative h-[400px] overflow-hidden rounded-2xl backdrop-blur-sm">
+    <div className="flex flex-col">
+      {[1, 2, 3, 4].map((index) => (
+        <div key={`mobile-skeleton-${index}`} className="px-3 pb-4">
+          <TestimonialCardSkeleton />
+        </div>
+      ))}
+    </div>
+    <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white to-transparent pointer-events-none z-20" />
+    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+  </div>
+);
+
+const DesktopMarqueeSkeleton = () => (
+  <div className="hidden lg:grid grid-cols-3 gap-5">
+    {/* Left Column Skeleton */}
+    <div className="relative h-[550px] overflow-hidden rounded-2xl backdrop-blur-sm">
+      <div className="flex flex-col">
+        {[1, 2, 3, 4].map((index) => (
+          <div key={`left-skeleton-${index}`} className="px-4 pb-5">
+            <TestimonialCardSkeleton />
+          </div>
+        ))}
+      </div>
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+    </div>
+
+    {/* Middle Column Skeleton */}
+    <div className="relative h-[550px] overflow-hidden rounded-2xl backdrop-blur-sm">
+      <div className="flex flex-col">
+        {[1, 2, 3, 4].map((index) => (
+          <div key={`middle-skeleton-${index}`} className="px-4 pb-5">
+            <TestimonialCardSkeleton />
+          </div>
+        ))}
+      </div>
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+    </div>
+
+    {/* Right Column Skeleton */}
+    <div className="relative h-[550px] overflow-hidden rounded-2xl backdrop-blur-sm">
+      <div className="flex flex-col">
+        {[1, 2, 3, 4].map((index) => (
+          <div key={`right-skeleton-${index}`} className="px-4 pb-5">
+            <TestimonialCardSkeleton />
+          </div>
+        ))}
+      </div>
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+    </div>
+  </div>
+);
+
 const TestimonialSection = () => {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
@@ -466,7 +563,7 @@ const TestimonialSection = () => {
                   transition: { duration: 0.2 },
                 }}
               >
-                <span className="text-white font-allan text-xs lg:text-sm font-bold  whitespace-nowrap">
+                <span className="text-white font-allan text-xs lg:text-sm font-bold whitespace-nowrap">
                   {testimonial.stats}
                 </span>
               </motion.div>
@@ -477,46 +574,63 @@ const TestimonialSection = () => {
     );
   };
 
-  if (loading && testimonials.length === 0) {
+  if (loading) {
     return (
       <section
         ref={sectionRef}
         className="relative py-16 lg:py-20 overflow-hidden bg-gradient-to-br from-gray-50 via-white to-teal-50/50"
       >
-        <div className="container relative z-10 px-4 mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center justify-center gap-3"
-          >
-            <div className="flex gap-1">
-              {[...Array(3)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="w-2 h-2 bg-teal-500 rounded-full"
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.7, 1, 0.7],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    delay: i * 0.2,
-                    ease: "easeInOut",
-                  }}
-                />
-              ))}
-            </div>
-            <span className="text-gray-600 font-mono text-sm">
-              Loading testimonials...
-            </span>
-          </motion.div>
+        {/* Background effects - same as main component but with reduced opacity */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute top-10 lg:top-20 left-5 lg:left-10 w-48 h-48 lg:w-72 lg:h-72 bg-gradient-to-r from-teal-200/20 to-emerald-200/10 lg:from-teal-200/30 lg:to-emerald-200/20 rounded-full blur-xl lg:blur-2xl"></div>
+          <div className="absolute bottom-10 lg:bottom-20 right-5 lg:right-10 w-48 h-48 lg:w-72 lg:h-72 bg-gradient-to-r from-emerald-200/10 to-teal-200/20 lg:from-emerald-200/20 lg:to-teal-200/30 rounded-full blur-xl lg:blur-2xl"></div>
+          <div
+            className="absolute inset-0 opacity-[0.02]"
+            style={{
+              backgroundImage: `
+              linear-gradient(rgba(20, 184, 166, 0.2) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(20, 184, 166, 0.2) 1px, transparent 1px)
+            `,
+              backgroundSize: "40px 40px",
+            }}
+          />
+        </div>
+
+        {/* Header Skeleton */}
+        <div className="text-center space-y-4 mb-12 animate-pulse">
+          <div className="h-5 w-48 bg-gray-300 rounded-full mx-auto"></div>
+          <div className="space-y-2">
+            <div className="h-10 w-64 bg-gray-300 rounded-lg mx-auto"></div>
+            <div className="h-10 w-80 bg-gray-300 rounded-lg mx-auto"></div>
+          </div>
+          <div className="h-4 w-96 bg-gray-200 rounded-full mx-auto"></div>
+        </div>
+
+        {/* Marquee Skeletons */}
+        <div className="relative z-10 max-w-6xl lg:max-w-7xl mx-auto px-3 lg:px-4">
+          <MobileMarqueeSkeleton />
+          <DesktopMarqueeSkeleton />
+        </div>
+
+        {/* Floating Stats Skeletons - Hidden on mobile */}
+        <div className="hidden lg:block absolute top-6 left-6 bg-white/90 backdrop-blur-xl rounded-xl p-4 border border-white/20 shadow-lg animate-pulse">
+          <div className="text-center">
+            <div className="h-6 w-12 bg-gray-300 rounded mb-1 mx-auto"></div>
+            <div className="h-3 w-16 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        <div className="hidden lg:block absolute bottom-6 right-6 bg-white/90 backdrop-blur-xl rounded-xl p-4 border border-white/20 shadow-lg animate-pulse">
+          <div className="text-center">
+            <div className="h-6 w-12 bg-gray-300 rounded mb-1 mx-auto"></div>
+            <div className="h-3 w-16 bg-gray-200 rounded"></div>
+          </div>
         </div>
       </section>
     );
   }
 
-  if (!loading && testimonials.length === 0) {
+  if (error || testimonials.length === 0) {
     return null;
   }
 
