@@ -6,12 +6,9 @@ import {
   FaTwitter,
   FaLinkedin,
   FaArrowRight,
-  FaLock,
-  FaStar,
   FaTrophy,
   FaLightbulb,
   FaShieldAlt,
-  FaHeart,
   FaCode,
   FaArrowUp,
 } from "react-icons/fa";

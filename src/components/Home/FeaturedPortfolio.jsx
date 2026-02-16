@@ -6,7 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiPlay, FiX, FiGrid, FiFilm, FiTool, FiEdit } from "react-icons/fi";
+import { FiPlay, FiX, FiFilm, FiTool, FiEdit } from "react-icons/fi";
 import Modal from "react-modal";
 import {
   getVideoReels,
@@ -400,6 +400,379 @@ const modalStyles = {
   },
 };
 
+// ============== STACKED CARD CAROUSEL COMPONENT ==============
+const StackedCardCarousel = ({
+  videos,
+  activeIndex,
+  setActiveIndex,
+  isPlaying,
+  setIsPlaying,
+  isHovered,
+  setIsHovered,
+}) => {
+  const [dragStart, setDragStart] = useState(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef(null);
+  const videoRefs = useRef([]);
+
+  const totalCards = videos.length;
+
+  // Handle drag navigation
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    setDragStart(e.clientX);
+  };
+
+  const handleDragMove = (e) => {
+    if (!isDragging || !dragStart) return;
+    const diff = e.clientX - dragStart;
+    setDragOffset(diff);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+
+    if (Math.abs(dragOffset) > 100) {
+      if (dragOffset > 0) {
+        // Drag right - show previous card
+        setActiveIndex((prev) => (prev - 1 + totalCards) % totalCards);
+      } else {
+        // Drag left - show next card
+        setActiveIndex((prev) => (prev + 1) % totalCards);
+      }
+    }
+
+    setIsDragging(false);
+    setDragStart(null);
+    setDragOffset(0);
+  };
+
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev - 1 + totalCards) % totalCards);
+  };
+
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev + 1) % totalCards);
+  };
+
+  const handleVideoPlay = (index) => {
+    // Pause any other playing videos
+    videoRefs.current.forEach((videoRef, i) => {
+      if (videoRef && i !== index) {
+        videoRef.pause();
+      }
+    });
+
+    setIsPlaying(true);
+    setActiveIndex(index);
+  };
+
+  const handleVideoEnd = () => {
+    setIsPlaying(false);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full min-h-[450px] flex items-center justify-center overflow-hidden py-4 md:py-6"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        handleDragEnd();
+      }}
+      onMouseDown={handleDragStart}
+      onMouseMove={handleDragMove}
+      onMouseUp={handleDragEnd}
+      style={{ cursor: isDragging ? "grabbing" : "grab" }}
+    >
+      <div
+        className="relative w-full flex items-center justify-center"
+        style={{ height: "420px", perspective: "2000px" }}
+      >
+        <AnimatePresence mode="popLayout">
+          {videos.slice(0, 20).map((video, index) => {
+            // Calculate position relative to active index
+            let position = index - activeIndex;
+
+            // Handle wrap-around for circular effect
+            if (position > totalCards / 2) position -= totalCards;
+            if (position < -totalCards / 2) position += totalCards;
+
+            // Stack effect calculations with drag influence
+            const translateX =
+              position * 140 + (isDragging ? dragOffset / 2 : 0);
+            const translateZ = -Math.abs(position) * 150;
+            const rotateY = position * 8;
+            const scale = 1 - Math.abs(position) * 0.15;
+            const opacity = Math.max(0.3, 1 - Math.abs(position) * 0.15);
+            const zIndex = 30 - Math.abs(position) * 2;
+
+            const isActive = position === 0;
+            const blur = Math.abs(position) * 0.8;
+            const brightness = Math.max(0.5, 1 - Math.abs(position) * 0.1);
+
+            // Base dimensions
+            const baseWidth = window.innerWidth < 768 ? 280 : 340;
+            const baseHeight = window.innerWidth < 768 ? 180 : 220;
+
+            // Active card is slightly larger
+            const width = isActive
+              ? baseWidth * 1.6
+              : baseWidth * (1 - Math.abs(position) * 0.05);
+            const height = isActive
+              ? baseHeight * 1.6
+              : baseHeight * (1 - Math.abs(position) * 0.05);
+
+            // Slight vertical offset for depth
+            const y = Math.sin(Math.abs(position) * 0.5) * 10;
+
+            return (
+              <motion.div
+                key={video.id}
+                className="absolute cursor-pointer"
+                initial={false}
+                animate={{
+                  x: translateX,
+                  y: y,
+                  z: translateZ,
+                  scale: scale,
+                  opacity: opacity,
+                  rotateY: rotateY,
+                  width: width,
+                  height: height,
+                  zIndex: zIndex,
+                  filter: `blur(${blur}px) brightness(${brightness})`,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 180,
+                  damping: 24,
+                  mass: 1,
+                  restDelta: 0.001,
+                  restSpeed: 0.001,
+                }}
+                whileHover={{
+                  scale: isActive ? 1.12 : scale * 1.08,
+                  zIndex: 200,
+                  filter: "blur(0px) brightness(1.15)",
+                  transition: { duration: 0.3, ease: "easeOut" },
+                }}
+                onClick={() => !isDragging && setActiveIndex(index)}
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  translateX: "-50%",
+                  translateY: "-50%",
+                  transformStyle: "preserve-3d",
+                  willChange: "transform, opacity, filter",
+                }}
+              >
+                <motion.div
+                  className={`relative bg-white rounded-lg md:rounded-xl overflow-hidden shadow-2xl ${
+                    isActive ? "ring-2 ring-teal-500 ring-opacity-50" : ""
+                  }`}
+                  animate={{
+                    boxShadow: isActive
+                      ? "0 30px 50px -20px rgba(20, 184, 166, 0.5), 0 0 0 2px rgba(20, 184, 166, 0.3)"
+                      : "0 15px 30px -12px rgba(0, 0, 0, 0.3)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  {isActive && isPlaying ? (
+                    <motion.video
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      ref={(el) => (videoRefs.current[index] = el)}
+                      src={video.videoUrl}
+                      className="w-full h-full object-cover"
+                      poster={video.thumbnail}
+                      controls
+                      autoPlay
+                      playsInline
+                      onEnded={handleVideoEnd}
+                    />
+                  ) : (
+                    <>
+                      <motion.img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.08 }}
+                        transition={{ duration: 0.5 }}
+                        loading="lazy"
+                      />
+
+                      {/* Gradient Overlay */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: isActive ? 1 : 0.7 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"
+                      />
+
+                      {/* Title and Info */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: isActive ? 1 : 0.8, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.1 }}
+                        className="absolute bottom-0 left-0 right-0 p-2 md:p-3"
+                      >
+                        <motion.h3
+                          animate={{ scale: isActive && isHovered ? 1.03 : 1 }}
+                          className={`text-white font-anton font-light drop-shadow-lg ${
+                            isActive
+                              ? "text-sm md:text-lg"
+                              : "text-xs md:text-sm"
+                          } truncate`}
+                        >
+                          {video.title}
+                        </motion.h3>
+
+                        {/* Category Badge - Only visible on hover of active card */}
+                        {isActive && isHovered && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-1"
+                          >
+                            <span className="inline-block px-2 py-0.5 bg-teal-500/80 backdrop-blur-sm rounded-full text-[10px] md:text-xs text-white">
+                              Featured Project
+                            </span>
+                          </motion.div>
+                        )}
+                      </motion.div>
+
+                      {/* Card Number Badge */}
+                      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-[10px] md:text-xs px-2 py-1 rounded-full">
+                        #{String(index + 1).padStart(2, "0")}
+                      </div>
+
+                      {/* Play Button Overlay */}
+                      {isActive && isHovered && !isPlaying && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm"
+                        >
+                          <motion.button
+                            initial={{ scale: 0.8 }}
+                            animate={{ scale: 1 }}
+                            whileHover={{ scale: 1.12 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVideoPlay(index);
+                            }}
+                            className="w-12 h-12 md:w-16 md:h-16 bg-teal-500 hover:bg-teal-600 rounded-full flex items-center justify-center shadow-2xl shadow-teal-500/30"
+                          >
+                            <motion.svg
+                              animate={{ x: [0, 2, 0] }}
+                              transition={{
+                                duration: 1.5,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                              }}
+                              className="w-6 h-6 md:w-8 md:h-8 text-white ml-0.5"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M8 5v14l11-7z" />
+                            </motion.svg>
+                          </motion.button>
+                        </motion.div>
+                      )}
+                    </>
+                  )}
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Navigation Buttons */}
+      <motion.button
+        onClick={handlePrev}
+        whileHover={{ scale: 1.1, x: -3 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-500 hover:text-white transition-colors duration-300 shadow-lg border border-gray-200"
+      >
+        <svg
+          className="w-5 h-5 md:w-6 md:h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </motion.button>
+
+      <motion.button
+        onClick={handleNext}
+        whileHover={{ scale: 1.1, x: 3 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-500 hover:text-white transition-colors duration-300 shadow-lg border border-gray-200"
+      >
+        <svg
+          className="w-5 h-5 md:w-6 md:h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </motion.button>
+
+      {/* Progress Indicators */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-1.5 md:gap-2">
+        {videos.slice(0, 16).map((_, index) => (
+          <motion.button
+            key={index}
+            onClick={() => setActiveIndex(index)}
+            className="group relative"
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <motion.div
+              animate={{
+                width:
+                  index === activeIndex
+                    ? window.innerWidth >= 768
+                      ? 40
+                      : 24
+                    : window.innerWidth >= 768
+                    ? 6
+                    : 4,
+                backgroundColor: index === activeIndex ? "#14b8a6" : "#d1d5db",
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="h-1.5 md:h-2 rounded-full shadow-lg"
+            />
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Projects = () => {
   // ============== STATE MANAGEMENT ==============
   const [featuredVideos, setFeaturedVideos] = useState([]);
@@ -422,11 +795,7 @@ const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
 
   // Refs
-  const videoRefs = useRef([]);
-  const autoplayRef = useRef(null);
-  const containerRef = useRef(null);
   const modalVideoRef = useRef(null);
-  const carouselIntervalRef = useRef(null);
 
   // Video tools data - memoized
   const videoTools = useMemo(
@@ -559,68 +928,6 @@ const Projects = () => {
     setProjects(formattedProjects);
   };
 
-  // ============== CLEANUP VIDEO REFS ==============
-  useEffect(() => {
-    return () => {
-      // Cleanup all video refs when component unmounts
-      videoRefs.current.forEach((videoRef) => {
-        if (videoRef) {
-          videoRef.pause();
-          videoRef.removeAttribute("src");
-          videoRef.load();
-        }
-      });
-    };
-  }, []);
-
-  // ============== FEATURED CAROUSEL FUNCTIONS ==============
-  useEffect(() => {
-    if (featuredVideos.length === 0 || isPlaying || isHovered) return;
-
-    carouselIntervalRef.current = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % featuredVideos.length);
-    }, 5000); // Slightly longer for smoother transitions
-
-    return () => {
-      if (carouselIntervalRef.current) {
-        clearInterval(carouselIntervalRef.current);
-      }
-    };
-  }, [featuredVideos.length, isPlaying, isHovered]);
-
-  const handleVideoPlay = useCallback((index) => {
-    // Pause any other playing videos
-    videoRefs.current.forEach((videoRef, i) => {
-      if (videoRef && i !== index) {
-        videoRef.pause();
-      }
-    });
-
-    setIsPlaying(true);
-    setActiveIndex(index);
-    if (carouselIntervalRef.current) {
-      clearInterval(carouselIntervalRef.current);
-    }
-  }, []);
-
-  const handleVideoEnd = useCallback(() => {
-    setIsPlaying(false);
-  }, []);
-
-  const handlePrev = useCallback(() => {
-    setActiveIndex(
-      (prev) => (prev - 1 + featuredVideos.length) % featuredVideos.length
-    );
-  }, [featuredVideos.length]);
-
-  const handleNext = useCallback(() => {
-    setActiveIndex((prev) => (prev + 1) % featuredVideos.length);
-  }, [featuredVideos.length]);
-
-  const handleThumbnailClick = useCallback((index) => {
-    setActiveIndex(index);
-  }, []);
-
   // ============== GRID PROJECTS FUNCTIONS ==============
   const handleCategoryChange = useCallback(
     async (categoryId) => {
@@ -656,64 +963,6 @@ const Projects = () => {
       }
     };
   }, []);
-
-  // ============== CAROUSEL POSITION CALCULATION ==============
-  const getPosition = useCallback(
-    (index) => {
-      const totalSlides = Math.min(featuredVideos.length, 20);
-      const centerIndex = activeIndex;
-
-      let offset = index - centerIndex;
-      if (offset > totalSlides / 2) offset -= totalSlides;
-      if (offset < -totalSlides / 2) offset += totalSlides;
-
-      const maxOffset = 9;
-      const normalizedOffset = Math.max(
-        -maxOffset,
-        Math.min(maxOffset, offset)
-      );
-
-      const spacing = 95;
-      const x = normalizedOffset * spacing;
-
-      const absOffset = Math.abs(normalizedOffset);
-      const z = -absOffset * 70;
-      const scale = 1 - absOffset * 0.05;
-      const opacity = Math.max(0.15, 1 - absOffset * 0.06);
-      const rotateY = normalizedOffset * 5;
-
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      const baseWidth = isMobile ? 220 : 340;
-      const baseHeight = isMobile ? 140 : 220;
-
-      const width =
-        absOffset === 0 ? baseWidth * 1.6 : baseWidth * (1 - absOffset * 0.02);
-      const height =
-        absOffset === 0
-          ? baseHeight * 1.6
-          : baseHeight * (1 - absOffset * 0.02);
-
-      const blur = absOffset * 0.4;
-      const brightness = Math.max(0.4, 1 - absOffset * 0.04);
-      const y = Math.sin(absOffset * 0.4) * 12;
-
-      return {
-        x,
-        y,
-        z,
-        scale,
-        opacity,
-        rotateY,
-        width,
-        height,
-        blur,
-        isActive: absOffset === 0,
-        zIndex: 100 - absOffset * 1.5,
-        brightness,
-      };
-    },
-    [activeIndex, featuredVideos.length]
-  );
 
   // ============== HELPER FUNCTIONS ==============
   const getAppNameFromTag = useCallback((tag) => {
@@ -867,7 +1116,7 @@ const Projects = () => {
           highlightOnNewLine={false}
         />
 
-        {/* ============== FEATURED 3D CAROUSEL SECTION ============== */}
+        {/* ============== FEATURED STACKED CARD CAROUSEL SECTION ============== */}
         {loading.featured ? (
           <FeaturedCarouselSkeleton />
         ) : (
@@ -909,264 +1158,16 @@ const Projects = () => {
                   />
                 </div>
 
-                {/* Main Carousel Container */}
-                <div
-                  ref={containerRef}
-                  className="relative w-full min-h-[450px] flex items-center justify-center overflow-hidden py-4 md:py-6"
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
-                >
-                  <div
-                    className="relative w-full flex items-center justify-center"
-                    style={{ height: "420px", perspective: "5000px" }}
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {featuredVideos.slice(0, 20).map((video, index) => {
-                        const pos = getPosition(index);
-                        if (pos.opacity <= 0.1) return null;
-
-                        return (
-                          <motion.div
-                            key={video.id}
-                            className="absolute cursor-pointer"
-                            initial={false}
-                            animate={{
-                              x: pos.x,
-                              y: pos.y,
-                              z: pos.z,
-                              scale: pos.scale,
-                              opacity: pos.opacity,
-                              rotateY: pos.rotateY,
-                              width: pos.width,
-                              height: pos.height,
-                              zIndex: pos.zIndex,
-                              filter: `blur(${pos.blur}px) brightness(${pos.brightness})`,
-                            }}
-                            transition={{
-                              type: "spring",
-                              stiffness: 150,
-                              damping: 24,
-                              mass: 1.2,
-                              restDelta: 0.001,
-                              restSpeed: 0.001,
-                            }}
-                            whileHover={{
-                              scale: pos.isActive ? 1.12 : pos.scale * 1.08,
-                              zIndex: 200,
-                              filter: "blur(0px) brightness(1.15)",
-                              transition: { duration: 0.3, ease: "easeOut" },
-                            }}
-                            onClick={() => handleThumbnailClick(index)}
-                            style={{
-                              left: "50%",
-                              top: "50%",
-                              translateX: "-50%",
-                              translateY: "-50%",
-                              transformStyle: "preserve-3d",
-                              willChange: "transform, opacity, filter",
-                            }}
-                          >
-                            <motion.div
-                              className={`relative bg-white rounded-lg md:rounded-xl overflow-hidden ${
-                                pos.isActive ? "ring-2 ring-teal-500" : ""
-                              }`}
-                              animate={{
-                                boxShadow: pos.isActive
-                                  ? "0 30px 50px -20px rgba(20, 184, 166, 0.5), 0 0 0 2px rgba(20, 184, 166, 0.3)"
-                                  : "0 15px 30px -12px rgba(0, 0, 0, 0.2)",
-                              }}
-                              transition={{ duration: 0.3 }}
-                              style={{ width: "100%", height: "100%" }}
-                            >
-                              {pos.isActive && isPlaying ? (
-                                <motion.video
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.5 }}
-                                  ref={(el) => (videoRefs.current[index] = el)}
-                                  src={video.videoUrl}
-                                  className="w-full h-full object-cover"
-                                  poster={video.thumbnail}
-                                  controls
-                                  autoPlay
-                                  playsInline
-                                  onEnded={handleVideoEnd}
-                                />
-                              ) : (
-                                <>
-                                  <motion.img
-                                    src={video.thumbnail}
-                                    alt={video.title}
-                                    className="w-full h-full object-cover"
-                                    whileHover={{ scale: 1.08 }}
-                                    transition={{ duration: 0.5 }}
-                                    loading="lazy"
-                                  />
-
-                                  {/* Gradient Overlay */}
-                                  <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{
-                                      opacity: pos.isActive ? 1 : 0.7,
-                                    }}
-                                    transition={{ duration: 0.3 }}
-                                    className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"
-                                  />
-
-                                  {/* Title */}
-                                  <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{
-                                      opacity: pos.isActive ? 1 : 0.8,
-                                      y: 0,
-                                    }}
-                                    transition={{ duration: 0.4, delay: 0.1 }}
-                                    className="absolute bottom-0 left-0 right-0 p-2 md:p-3"
-                                  >
-                                    <motion.h3
-                                      animate={{
-                                        scale:
-                                          pos.isActive && isHovered ? 1.03 : 1,
-                                      }}
-                                      className={`text-white font-anton font-light drop-shadow-lg ${
-                                        pos.isActive
-                                          ? "text-sm md:text-lg"
-                                          : "text-xs md:text-sm"
-                                      } truncate`}
-                                    >
-                                      {video.title}
-                                    </motion.h3>
-                                  </motion.div>
-
-                                  {/* Play Button */}
-                                  {pos.isActive && isHovered && !isPlaying && (
-                                    <motion.div
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      exit={{ opacity: 0 }}
-                                      transition={{ duration: 0.2 }}
-                                      className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm"
-                                    >
-                                      <motion.button
-                                        initial={{ scale: 0.8 }}
-                                        animate={{ scale: 1 }}
-                                        whileHover={{ scale: 1.12 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleVideoPlay(index);
-                                        }}
-                                        className="w-12 h-12 md:w-16 md:h-16 bg-teal-500 hover:bg-teal-600 rounded-full flex items-center justify-center shadow-2xl shadow-teal-500/30"
-                                      >
-                                        <motion.svg
-                                          animate={{ x: [0, 2, 0] }}
-                                          transition={{
-                                            duration: 1.5,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                          }}
-                                          className="w-6 h-6 md:w-8 md:h-8 text-white ml-0.5"
-                                          fill="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path d="M8 5v14l11-7z" />
-                                        </motion.svg>
-                                      </motion.button>
-                                    </motion.div>
-                                  )}
-                                </>
-                              )}
-                            </motion.div>
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Navigation Buttons */}
-                  <motion.button
-                    onClick={handlePrev}
-                    whileHover={{ scale: 1.1, x: -3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-500 hover:text-white transition-colors duration-300 shadow-lg border border-gray-200"
-                  >
-                    <svg
-                      className="w-5 h-5 md:w-6 md:h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                  </motion.button>
-
-                  <motion.button
-                    onClick={handleNext}
-                    whileHover={{ scale: 1.1, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-500 hover:text-white transition-colors duration-300 shadow-lg border border-gray-200"
-                  >
-                    <svg
-                      className="w-5 h-5 md:w-6 md:h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </motion.button>
-
-                  {/* Progress Indicators */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-1.5 md:gap-2">
-                    {featuredVideos.slice(0, 16).map((_, index) => (
-                      <motion.button
-                        key={index}
-                        onClick={() => handleThumbnailClick(index)}
-                        className="group relative"
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 25,
-                        }}
-                      >
-                        <motion.div
-                          animate={{
-                            width:
-                              index === activeIndex
-                                ? window.innerWidth >= 768
-                                  ? 40
-                                  : 24
-                                : window.innerWidth >= 768
-                                ? 6
-                                : 4,
-                            backgroundColor:
-                              index === activeIndex ? "#14b8a6" : "#d1d5db",
-                          }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30,
-                          }}
-                          className="h-1.5 md:h-2 rounded-full shadow-lg"
-                        />
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                {/* Stacked Card Carousel */}
+                <StackedCardCarousel
+                  videos={featuredVideos}
+                  activeIndex={activeIndex}
+                  setActiveIndex={setActiveIndex}
+                  isPlaying={isPlaying}
+                  setIsPlaying={setIsPlaying}
+                  isHovered={isHovered}
+                  setIsHovered={setIsHovered}
+                />
               </section>
             </motion.div>
           )
