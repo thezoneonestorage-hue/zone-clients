@@ -497,7 +497,7 @@ const NextGenServices = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.4 }}
         viewport={{ once: true }}
-        className="text-center mt-12 relative z-10 p-6 font-poppins"
+        className="text-center  relative z-10 p-6 font-poppins"
       >
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/80 border border-teal-200 shadow-sm mb-6">
           <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />

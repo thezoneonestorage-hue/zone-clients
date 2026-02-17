@@ -603,7 +603,7 @@ const MotionCredit = () => {
     }
 
     return (
-      <div className="mb-8 md:mb-12 lg:mb-20">
+      <div className="">
         <div className="max-w-7xl mx-auto px-3 sm:px-4">
           {/* Simple status indicator */}
           <div className="flex items-center justify-end mb-3 sm:mb-4">
