@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import BookingModal from "../BookingModal";
-import { verifyTokenOnInit, logout } from "../../services/api"; // Adjust path as needed
+import { verifyTokenOnInit, logout } from "../../services/api";
 import logo from "../../assets/Zone-logo.png";
+import useMediaQuery from "../../hooks/useMediaQuery";
 
 const NextGenNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +25,9 @@ const NextGenNavbar = () => {
   const profileRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -53,13 +63,14 @@ const NextGenNavbar = () => {
     }
   };
 
+  // Optimized scroll handler
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
       setScrolled(isScrolled);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -69,154 +80,185 @@ const NextGenNavbar = () => {
     setIsProfileOpen(false);
   }, [location]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await logout();
       setIsAuthenticated(false);
       setUser(null);
       setIsProfileOpen(false);
-      // Redirect to home page after logout
       window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
-      // Still update UI even if API call fails
       setIsAuthenticated(false);
       setUser(null);
       setIsProfileOpen(false);
       window.location.href = "/";
     }
-  };
+  }, []);
 
-  const handleDashboard = () => {
+  const handleDashboard = useCallback(() => {
     setIsProfileOpen(false);
-    window.location.href = "/dashboard"; // Adjust dashboard route as needed
-  };
+    window.location.href = "/dashboard";
+  }, []);
 
-  const handleNavigation = (path) => {
+  const handleNavigation = useCallback((path) => {
     setIsOpen(false);
     setIsProfileOpen(false);
     window.location.href = path;
-  };
+  }, []);
 
-  const menuItems = [
-    { name: "Home", path: "/" },
-    { name: "Portfolio", path: "/projects" },
-    { name: "Services", path: "/services" },
-    { name: "About", path: "/whyChooseUs" },
-    { name: "Contact", path: "/contact" },
-    { name: "Faqs", path: "/faqs" },
-  ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: -20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const mobileMenuVariants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: {
-      opacity: 1,
-      height: "auto",
-      transition: {
-        duration: 0.3,
-        ease: "easeInOut",
-      },
-    },
-    exit: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeInOut",
-      },
-    },
-  };
-
-  const dropdownVariants = {
-    hidden: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-      transition: {
-        duration: 0.15,
-        ease: "easeIn",
-      },
-    },
-  };
-
-  // Function to handle book a call click
-  const handleBookCall = () => {
+  const handleBookCall = useCallback(() => {
     setIsModalOpen(true);
     setIsOpen(false);
-  };
+  }, []);
 
-  // Function to get user initials for avatar
-  const getUserInitials = () => {
+  // Memoized menu items
+  const menuItems = useMemo(
+    () => [
+      { name: "Home", path: "/" },
+      { name: "Portfolio", path: "/projects" },
+      { name: "Services", path: "/services" },
+      { name: "About", path: "/whyChooseUs" },
+      { name: "Contact", path: "/contact" },
+      { name: "Faqs", path: "/faqs" },
+    ],
+    []
+  );
+
+  // Get user initials for avatar
+  const getUserInitials = useCallback(() => {
     if (!user) return "U";
     if (user.name) {
       return user.name
         .split(" ")
         .map((n) => n[0])
         .join("")
-        .toUpperCase();
+        .toUpperCase()
+        .slice(0, 2);
     }
     if (user.email) {
       return user.email[0].toUpperCase();
     }
     return "U";
-  };
+  }, [user]);
+
+  // Simplified animations for mobile
+  const containerVariants = useMemo(
+    () => ({
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: isMobile ? 0.05 : 0.1,
+          delayChildren: isMobile ? 0.1 : 0.3,
+        },
+      },
+    }),
+    [isMobile]
+  );
+
+  const itemVariants = useMemo(
+    () => ({
+      hidden: { y: -20, opacity: 0 },
+      visible: {
+        y: 0,
+        opacity: 1,
+        transition: { duration: isMobile ? 0.3 : 0.5, ease: "easeOut" },
+      },
+    }),
+    [isMobile]
+  );
+
+  const mobileMenuVariants = useMemo(
+    () => ({
+      hidden: { opacity: 0, height: 0 },
+      visible: {
+        opacity: 1,
+        height: "auto",
+        transition: { duration: isMobile ? 0.2 : 0.3, ease: "easeInOut" },
+      },
+      exit: {
+        opacity: 0,
+        height: 0,
+        transition: { duration: isMobile ? 0.2 : 0.3, ease: "easeInOut" },
+      },
+    }),
+    [isMobile]
+  );
+
+  const dropdownVariants = useMemo(
+    () => ({
+      hidden: { opacity: 0, y: -10, scale: 0.95 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: isMobile ? 0.15 : 0.2, ease: "easeOut" },
+      },
+      exit: {
+        opacity: 0,
+        y: -10,
+        scale: 0.95,
+        transition: { duration: isMobile ? 0.1 : 0.15, ease: "easeIn" },
+      },
+    }),
+    [isMobile]
+  );
+
+  // Background animation elements - disabled on mobile
+  const backgroundElements = useMemo(() => {
+    if (isMobile) return null;
+
+    return (
+      <>
+        <motion.div
+          className="absolute top-0 left-1/4 w-1 h-1 rounded-full bg-teal-400"
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute top-0 right-1/3 w-1 h-1 rounded-full bg-emerald-400"
+          animate={{
+            scale: [1, 2, 1],
+            opacity: [0.2, 0.5, 0.2],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        />
+      </>
+    );
+  }, [isMobile]);
 
   return (
     <motion.nav
       ref={navbarRef}
-      className={`fixed w-full z-50 transition-all font-poppins duration-500 ${
+      className={`fixed w-full z-50 transition-all font-poppins duration-300 ${
         scrolled
-          ? "bg-white/95 backdrop-blur-md py-2 border-b border-teal-200 shadow-sm"
-          : "bg-transparent py-4"
+          ? "bg-white/95 backdrop-blur-md py-2 md:py-2 border-b border-teal-200 shadow-sm"
+          : "bg-transparent py-3 md:py-4"
       }`}
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <div className="container mx-auto px-4 md:px-8">
+      <div className="container mx-auto px-3 md:px-4 lg:px-8">
         <div className="flex justify-between items-center">
-          {/* Logo */}
+          {/* Logo - smaller on mobile */}
           <motion.div
             className="flex items-center"
             variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
+            whileHover={!isMobile ? { scale: 1.05 } : undefined}
           >
             <a
               href="/"
@@ -231,7 +273,10 @@ const NextGenNavbar = () => {
                   <img
                     src={logo}
                     alt="Zone Logo"
-                    className="h-8 object-contain" // Adjust height as needed
+                    className={`${
+                      isMobile ? "h-6" : isTablet ? "h-7" : "h-8"
+                    } object-contain transition-all duration-300`}
+                    loading="eager"
                   />
                 </div>
               </div>
@@ -248,7 +293,7 @@ const NextGenNavbar = () => {
                 key={index}
                 className="relative"
                 variants={itemVariants}
-                whileHover={{ y: -2 }}
+                whileHover={!isMobile ? { y: -2 } : undefined}
                 whileTap={{ y: 0 }}
               >
                 <a
@@ -257,7 +302,7 @@ const NextGenNavbar = () => {
                     e.preventDefault();
                     handleNavigation(item.path);
                   }}
-                  className={`relative px-4 py-2 group block focus:outline-none cursor-pointer ${
+                  className={`relative px-3 lg:px-4 py-2 group block focus:outline-none cursor-pointer text-sm lg:text-base ${
                     location.pathname === item.path
                       ? "text-teal-600"
                       : "text-gray-600 hover:text-gray-900"
@@ -285,11 +330,11 @@ const NextGenNavbar = () => {
               >
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium relative overflow-hidden group"
-                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium relative overflow-hidden group"
+                  whileHover={!isMobile ? { scale: 1.05 } : undefined}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span className="relative z-10 text-sm font-semibold">
+                  <span className="relative z-10 text-xs lg:text-sm font-semibold">
                     {getUserInitials()}
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -359,8 +404,8 @@ const NextGenNavbar = () => {
             )}
 
             <motion.button
-              className="ml-4 px-6 py-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium rounded-full relative overflow-hidden group"
-              whileHover={{ scale: 1.05 }}
+              className="ml-4 px-4 lg:px-6 py-1.5 lg:py-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium rounded-full relative overflow-hidden group text-sm lg:text-base"
+              whileHover={!isMobile ? { scale: 1.05 } : undefined}
               whileTap={{ scale: 0.95 }}
               variants={itemVariants}
               onClick={handleBookCall}
@@ -381,7 +426,7 @@ const NextGenNavbar = () => {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-semibold mr-2"
+                  className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-xs font-semibold mr-1"
                 >
                   {getUserInitials()}
                 </button>
@@ -451,27 +496,30 @@ const NextGenNavbar = () => {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-600 hover:text-gray-900 focus:outline-none"
+              className="text-gray-600 hover:text-gray-900 focus:outline-none p-1"
               aria-label="Toggle menu"
             >
-              <div className="w-6 h-6 flex flex-col justify-between items-center">
+              <div className="w-5 h-5 flex flex-col justify-between items-center">
                 <motion.span
-                  className="w-6 h-0.5 bg-teal-500 block"
+                  className="w-5 h-0.5 bg-teal-500 block rounded-full"
                   animate={{
                     rotate: isOpen ? 45 : 0,
-                    y: isOpen ? 8 : 0,
+                    y: isOpen ? 6 : 0,
                   }}
+                  transition={{ duration: 0.2 }}
                 ></motion.span>
                 <motion.span
-                  className="w-6 h-0.5 bg-teal-500 block"
+                  className="w-5 h-0.5 bg-teal-500 block rounded-full"
                   animate={{ opacity: isOpen ? 0 : 1 }}
+                  transition={{ duration: 0.2 }}
                 ></motion.span>
                 <motion.span
-                  className="w-6 h-0.5 bg-teal-500 block"
+                  className="w-5 h-0.5 bg-teal-500 block rounded-full"
                   animate={{
                     rotate: isOpen ? -45 : 0,
-                    y: isOpen ? -8 : 0,
+                    y: isOpen ? -6 : 0,
                   }}
+                  transition={{ duration: 0.2 }}
                 ></motion.span>
               </div>
             </button>
@@ -482,29 +530,33 @@ const NextGenNavbar = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="md:hidden mt-4 overflow-hidden"
+              className="md:hidden mt-3 overflow-hidden"
               variants={mobileMenuVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <div className="py-4 bg-white/95 backdrop-blur-lg rounded-lg border border-teal-200 shadow-xl">
+              <div className="py-3 bg-white/95 backdrop-blur-lg rounded-lg border border-teal-200 shadow-xl">
                 {menuItems.map((item, index) => (
-                  <motion.div key={index} whileTap={{ scale: 0.98 }}>
+                  <motion.div
+                    key={index}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.1 }}
+                  >
                     <a
                       href={item.path}
                       onClick={(e) => {
                         e.preventDefault();
                         handleNavigation(item.path);
                       }}
-                      className={`block w-full text-left px-6 py-3 transition-colors duration-300 focus:outline-none cursor-pointer ${
+                      className={`block w-full text-left px-5 py-2.5 transition-colors duration-300 focus:outline-none cursor-pointer text-sm ${
                         location.pathname === item.path
                           ? "text-teal-600 bg-teal-50"
                           : "text-gray-600 hover:text-gray-900 hover:bg-teal-50"
                       }`}
                     >
                       <span className="flex items-center">
-                        <span className="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>
+                        <span className="w-1.5 h-1.5 bg-teal-500 rounded-full mr-3"></span>
                         {item.name}
                       </span>
                     </a>
@@ -517,7 +569,7 @@ const NextGenNavbar = () => {
                     <div className="border-t border-teal-100 my-2"></div>
                     <button
                       onClick={handleDashboard}
-                      className="flex items-center w-full px-6 py-3 text-gray-600 hover:text-gray-900 hover:bg-teal-50 transition-colors duration-300"
+                      className="flex items-center w-full px-5 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-teal-50 transition-colors duration-300"
                     >
                       <svg
                         className="w-4 h-4 mr-3 text-teal-500"
@@ -536,7 +588,7 @@ const NextGenNavbar = () => {
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-6 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-300"
+                      className="flex items-center w-full px-5 py-2.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors duration-300"
                     >
                       <svg
                         className="w-4 h-4 mr-3"
@@ -556,9 +608,9 @@ const NextGenNavbar = () => {
                   </>
                 )}
 
-                <div className="px-6 py-4 mt-2">
+                <div className="px-5 py-3 mt-2">
                   <motion.button
-                    className="w-full px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium rounded-full relative overflow-hidden"
+                    className="w-full px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium rounded-full relative overflow-hidden text-sm"
                     whileTap={{ scale: 0.95 }}
                     onClick={handleBookCall}
                   >
@@ -572,36 +624,8 @@ const NextGenNavbar = () => {
         </AnimatePresence>
       </div>
 
-      {/* Animated elements */}
-      {!scrolled && (
-        <>
-          <motion.div
-            className="absolute top-0 left-1/4 w-1 h-1 rounded-full bg-teal-400"
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute top-0 right-1/3 w-1 h-1 rounded-full bg-emerald-400"
-            animate={{
-              scale: [1, 2, 1],
-              opacity: [0.2, 0.5, 0.2],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          />
-        </>
-      )}
+      {/* Animated elements - disabled on mobile */}
+      {!scrolled && !isMobile && backgroundElements}
 
       {/* TidyCal Modal */}
       <BookingModal

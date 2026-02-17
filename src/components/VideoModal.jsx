@@ -191,16 +191,14 @@ export default function VideoModal({
 
   // Quick tag suggestions
   const tagSuggestions = [
-    "Editing",
-    "Cinematic",
-    "Professional",
-    "4K",
-    "Color Grading",
-    "Motion Graphics",
-    "Sound Design",
-    "Short Film",
-    "Commercial",
-    "Social Media",
+    "Adobe Premiere Pro",
+    "Adobe After Effects",
+    "Final Cut Pro",
+    "DaVinci Resolve",
+    "CapCut",
+    "Blender",
+    "Animation",
+    "AI",
   ];
 
   return (
@@ -510,7 +508,7 @@ export default function VideoModal({
                       <div>
                         <label className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                           <FiTag className="h-4 w-4 mr-2 text-orange-500" />
-                          Tags
+                          Tools
                           <span className="ml-auto text-xs text-gray-500">
                             {tags.length}/10
                           </span>
